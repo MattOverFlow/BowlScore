@@ -1,0 +1,358 @@
+@import url('https://fonts.googleapis.com/css?family=Electrolize');
+@import url('https://fonts.googleapis.com/css?family=Inter');
+
+/* sistemare colori e rappresentazione base delle pagine di registrazione e login*/
+
+body{
+    background-color: #F9F9F9;
+}
+
+input {
+    color: #050301 !important;
+}
+
+textarea {
+    color: #000000 !important; /* Black color */
+}
+
+h1{
+    font-size: 70px;
+    color: black !important;
+    font-family:'Electrolize';
+}
+
+div[id="BlockBanner"]{
+    color: white;
+    background-color: #0278d3;
+    border-top-left-radius:10px;
+    border-top-right-radius: 10px;
+    height:40px;
+    font-size: 21px;
+    font-family: 'Inter';
+    font-weight:300;
+}
+
+.infoblock {
+    color: #333333; /* Colore del testo */
+    border-radius: 10px; /* Angoli stondati */
+    font-family: 'Arial', sans-serif; /* Font da informazione */
+    background-color: #FFE45E !important; /* Sfondo giallo */
+    padding: 10px; /* Padding per un po' di spazio interno */
+}
+
+.infoblock > h5 {
+    font-family: 'Courier New', Courier, monospace; /* Font informatico */
+    font-size: 13px;
+}
+
+.name_surname {
+    height: fit-content;
+    padding-top: 10px;
+    color: rgba(105, 105, 105, 0.8) !important; /* Grigio ancora più scuro con trasparenza */
+    font-size: 24px; /* Dimensione del testo grande */
+}
+
+div[id="MainBlock"]{
+    background-color: #7FC8F8;
+    border-radius: 10px;
+    box-shadow: inset 0px -4px 0px rgba(0, 0, 0, 0.8);
+}
+
+.form-label{
+    font-family: 'Inter';
+    color: #050301;
+}
+
+a[id=RegisterLink]{
+    color: #050301;
+    text-decoration: none;
+}
+
+a[id=RegisterLink]:hover {
+    text-decoration: underline;
+}
+
+.invalid-feedback{
+    color: #8B0000 !important;
+}
+
+.form-control.is-valid, .was-validated .form-control:valid {
+    border-color: #ced4da;
+    padding-right: .75rem;
+    background-image: none;
+}
+
+.invalid-feedback, .valid-feedback {
+    height: 20px; 
+}
+
+div[id="error-message"]{
+    color: #8B0000 !important;
+}
+
+#error-message p{
+    color: #8B0000 !important;
+}
+
+p{
+    font-family: 'Inter';
+}
+
+#mainblock, #mainblock * {
+    font-family: 'Inter', sans-serif;
+}
+
+/*Buttons*/
+
+.btn-primary{
+    background-color: #FFE45E;
+    border-color:transparent;
+    border:none;
+    width: 40%;
+    transition: background-color 0.5s ease;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: inset 0px -4px 0px rgba(0, 0, 0, 0.5);
+    padding-top: 2px;
+    color: #050301 !important;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-primary:hover{
+    background-color: #ff9e00;
+    border-color:transparent;
+    border:none;
+    color: #050301;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-primary:focus {
+    outline:none;
+    background-color: #ff9e00;
+    border-color:transparent;
+    border:none;
+    width: 40%;
+    transition: background-color 0.5s ease;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: inset 0px -4px 0px rgba(0, 0, 0, 0.5);
+    padding-top: 2px;
+    color: #050301 !important;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-primary:active{
+    background-color: #ff7900;
+    border-color:transparent;
+    border:none;
+    box-shadow: inset 0px -2px 0px rgba(0, 0, 0, 0.5);
+}
+a {
+    color: transparent;
+    outline: none; 
+    font-weight: normal; 
+}
+
+a:focus {
+    outline: none;
+}
+
+.btn-secondary{
+    background-color: #5AA9E6;
+    border-color:transparent;
+    border:none;
+    width: 40%;
+    transition: background-color 0.5s ease;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: inset 0px -4px 0px rgba(0, 0, 0, 0.5);
+    padding-top: 2px;
+    color: #000000 !important;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-secondary:hover{
+    background-color: #0278d3;
+    border-color:transparent;
+    border:none;
+    color: #ffffff;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-secondary:focus {
+    outline:none;
+    background-color: #0278d3;
+    border-color:transparent;
+    border:none;
+    width: 40%;
+    transition: background-color 0.5s ease;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: inset 0px -4px 0px rgba(0, 0, 0, 0.5);
+    padding-top: 2px;
+    color: #ffffff;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-secondary:active{
+    background-color: #0278d3;
+    border-color:transparent;
+    border:none;
+    box-shadow: inset 0px -2px 0px rgba(0, 0, 0, 0.5);
+}
+
+/*button thrird*/
+
+.btn-danger{
+    background-color: #e65858;
+    border-color:transparent;
+    border:none;
+    width: 40%;
+    transition: background-color 0.5s ease;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: inset 0px -4px 0px rgba(0, 0, 0, 0.5);
+    padding-top: 2px;
+    color: #000000 !important;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-danger:hover{
+    background-color: #e63b3b;
+    border-color:transparent;
+    border:none;
+    color: #000;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-danger:focus {
+    outline:none;
+    background-color: #e63b3b;
+    border-color:transparent;
+    border:none;
+    width: 40%;
+    transition: background-color 0.5s ease;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: inset 0px -4px 0px rgba(0, 0, 0, 0.5);
+    padding-top: 2px;
+    color: #000;
+    text-rendering: optimizeLegibility;
+}
+
+.btn-danger:active{
+    background-color: #e63b3b;
+    border-color:transparent;
+    border:none;
+    box-shadow: inset 0px -2px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* tabella */
+
+.styled-table {
+    background-color: #FFE45E !important; /* Sfondo giallo */
+    border-collapse: collapse; /* Rimuove gli spazi tra le celle */
+    width: 100%; /* Larghezza completa */
+    margin: 25px 0; /* Margine superiore e inferiore */
+    font-size: 0.9em; /* Dimensione del testo */
+    font-family: 'Arial', sans-serif; /* Font */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15) !important; /* Ombra */
+    border-radius: 10px;
+}
+
+.styled-table thead tr {
+    background-color: white !important; /* Sfondo blu per l'intestazione */
+    color: black !important; /* Testo bianco */
+    text-align: left; /* Allineamento del testo a sinistra */
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px; /* Padding delle celle */
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd; /* Bordo inferiore delle righe */
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #fdfd7f  !important; /* Sfondo alternato per le righe pari */
+    border-bottom: 2px solid black; /* Bordo nero spesso per i blocchi di ogni round */
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid black; /* Bordo nero spesso per i blocchi di ogni round */
+
+}
+
+.styled-table tbody tr:first-of-type {
+    border-top: 2px solid black; /* Bordo nero spesso per i blocchi di ogni round */
+
+}
+
+.styled-table tbody td {
+    border: 2px solid black; /* Bordo nero spesso per i blocchi di ogni round */
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold; /* Testo in grassetto per la riga attiva */
+    color: #0278d3 !important; /* Testo blu per la riga attiva */
+}
+
+/* podio */
+
+.ranking-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: 20px;
+}
+
+.ranking-container > div {
+    text-align: center;
+    margin: 0 10px;
+    position: relative;
+}
+
+.ranking-container .name {
+    font-weight: bold;
+    position: absolute;
+    top: -40px;
+    width: 100%;
+    font-size: 1.2em; /* Stessa dimensione del nome argento */
+}
+
+.first-place {
+    background-color: gold;
+    width: 120px; /* Box più grande */
+    height: 180px; /* Box più grande */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    order: 2; /* Posiziona al centro */
+}
+
+.second-place {
+    background-color: silver;
+    width: 120px; /* Box più grande */
+    height: 150px; /* Box più grande */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    order: 1; /* Posiziona a sinistra */
+}
+
+.third-place {
+    background-color: #cd7f32; /* Bronzo */
+    width: 120px; /* Box più grande */
+    height: 120px; /* Box più grande */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    order: 3; /* Posiziona a destra */
+}
