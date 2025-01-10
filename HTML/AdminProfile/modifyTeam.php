@@ -26,7 +26,8 @@ include '../../PHP/Utils/auth_request.php';
                 <a href="createTeam.php" class="sidebarField">Crea team</a>
                 <a href="manageTournaments.php" class="sidebarField">Gestisci tornei</a>
                 <a href="manageTeams.php" class="sidebarField">Gestisci teams</a>
-                <a href="statisticPage.php" class="sidebarField">Statistiche generali</a>
+                <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Statistiche generali</a>
+                <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca giocatori</a>                    
                 <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">
@@ -39,6 +40,13 @@ include '../../PHP/Utils/auth_request.php';
         </header>
         <main class="pt-3 d-flex flex-column align-items-center">
         </main>
+        <!-- Messaggio di errore -->
+        <div id="error-message" style="display: none; color: white; background-color: red; padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center;">
+        </div>
+
+        <!-- Messaggio popup -->
+        <div id="popup-message" style="display: none; color: white; background-color: green; padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center;">
+        </div>
     </div>
 </body>
 <script src="../../JAVASCRIPT\Utils\sidenav.js" type="module"></script>

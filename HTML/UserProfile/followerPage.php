@@ -1,5 +1,16 @@
 <?php
     include '../../PHP/Utils/auth_request.php';
+
+    include_once '../../PHP/Database/User.php';
+
+    if(!isset($_GET['useridUtente'])){
+        $users = listaFollowers($_SESSION['userid']);
+        $username = $_SESSION['username'];
+    }
+    else{
+        $users = listaFollowers($_GET['useridUtente']);
+        $username = scaricaUtente($_GET['useridUtente'])['username'];
+    }
 ?>
 
 <!DOCTYPE html>
@@ -20,10 +31,11 @@
                 <a href="#" class="closebtn" id="closebtn">&times;</a>
                 <a href="cardAndSubscription.php" class="sidebarField">Carte e abbonamenti</a>
                     <a href="historyMatchPage.php" class="sidebarField">Storico partite</a>
-                    <a href="#" class="sidebarField">Storico tornei</a>
+                    <a href="historyTournaments.php" class="sidebarField">Storico tornei</a>
                     <a href="matchPage.php" class="sidebarField">Partite</a>
                     <a href="userpage.php" class="sidebarField">Profilo</a>
-                    <a href="searchPage.php" class="sidebarField">Cerca</a>                    
+                    <a href="searchPage.php" class="sidebarField">Cerca</a>    
+                    <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Statistiche generali</a>
                     <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">
@@ -36,7 +48,7 @@
         </header>
         <main class="col-12 pt-3 d-flex flex-column align-items-center">
             <div class="d-flex align-items-center justify-content-between mt-4">
-                <p id="username">utente</p>
+                <p id="username"><?php echo $username;?></p>
             </div>
             <div class="col-4 d-flex flex-column align-items-center justify-content-center mt-4" id="usersList">
                 <div class="col-6 d-flex align-items-center px-3">
@@ -49,5 +61,55 @@
     </div>
 </body>
 <script src="../../JAVASCRIPT\Utils\sidenav.js" type="module"></script>
-<script src="../../JAVASCRIPT/Profile/friendList.js" type="module"></script>
+<script src="../../JAVASCRIPT/Profile/followerPage.js" type="module"></script>
 </html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const users = <?php echo json_encode($users); ?>;
+        const usersList = document.getElementById("usersList"); // Aggiungi questa riga per ottenere l'elemento corretto
+
+
+        function getUrlParams() {
+        const params = {};
+        const queryString = window.location.search.substring(1);
+        const regex = /([^&=]+)=([^&]*)/g;
+        let m;
+        while (m = regex.exec(queryString)) {
+            params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+        }
+        return params;
+        }
+
+        // Ottieni i parametri dell'URL
+        const urlParams = getUrlParams();
+        const isAdmin = urlParams.type === 'admin';
+
+
+
+        users.forEach(function(user) {
+            var noUsers = document.getElementById("usernameLabel");
+            noUsers.style.display = 'none';
+
+            var row = document.createElement("div");
+            row.className = "row col-9 friendlist-row";
+            row.innerHTML = `
+                <div class="col-md-3 username">${user.username}</div>
+                <div class="col-md-3 fullname">${user.nome}</div>
+                <div class="col-md-3 fullname">${user.cognome}</div>
+            `;
+            
+            // Aggiungi un evento di click per navigare alla pagina dell'utente
+            row.addEventListener("click", function() {
+                var newUrl = `friendPage.php?useridUtente=${user.userid}`;
+                if (isAdmin) {
+                    newUrl += '&type=admin';
+                }
+                window.location.href = newUrl;
+            });
+
+            // Aggiungi la riga appena creata all'elemento usersList
+            usersList.appendChild(row);
+        });
+    });
+</script>

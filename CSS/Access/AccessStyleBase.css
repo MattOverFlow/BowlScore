@@ -322,6 +322,19 @@ a:focus {
     font-size: 1.2em; /* Stessa dimensione del nome argento */
 }
 
+#error-message, #popup-message {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    max-width: 90%;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
 .first-place {
     background-color: gold;
     width: 120px; /* Box più grande */

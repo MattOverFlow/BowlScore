@@ -1,6 +1,6 @@
 <?php
     if(isset($_COOKIE['token'])) {
-        header('Location: ../../HTML/Profile/userpage.php');
+        header('Location: ../../HTML/UserProfile/userpage.php');
     }
 ?>
 
@@ -24,7 +24,7 @@
                     <div id="BlockBanner" class="col-12 d-flex flex-column justify-content-center align-items-center text-center ">
                         Registrazione
                     </div>
-                    <form id="FormRegistration" action="../../PHP/Access/ProcessRegistration.php" method="POST" novalidate>
+                    <form id="FormRegistration" action="../../PHP/Process/processRegistration.php" method="POST" novalidate>
                         <div class="row container-fluid">
                             <div class="col-md-6  mb-2 d-flex flex-column justify-content-center align-items-center">
                                 <div class="col-8 mt-2">
@@ -71,9 +71,9 @@
                             <div class="col-md-6  mb-md-4 d-flex flex-column">
                                 <div class="form-group">
                                     <fieldset class="col-md-8 ms-5">
-                                        <legend class="offset-2" style=" font-size: 1.1em;">Indicare il proprio genere (opzionale):</legend>
+                                        <legend class="offset-2" style=" font-size: 1.1em;">Indicare il proprio genere:</legend>
                                         <div class="form-check col-8 offset-1 offset-md-2">
-                                            <input class="form-check-input" type="radio" name="gender" id="male" value="male">
+                                            <input class="form-check-input" type="radio" name="gender" id="male" value="male" checked>
                                             <label class="form-check-label" for="male">
                                                 Maschio
                                             </label>
@@ -97,6 +97,12 @@
                                 <div class="form-group">
                                     <label for="birthDate" class="form-label">Data di nascita:</label>
                                     <input type="date" class="form-control" name="birthDate" id="birthDate" required>
+                                </div>
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" name="isAdmin" id="isAdmin" value="true">
+                                    <label class="form-check-label" for="isAdmin">
+                                        Account di tipo admin
+                                    </label>
                                 </div>
                             </div>
                         </div>

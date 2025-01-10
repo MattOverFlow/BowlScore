@@ -20,13 +20,14 @@ include '../../PHP/Utils/auth_request.php';
     <div class="container-fluid p-0 overflow-x-hidden overflow-y-auto" id="body_container">
         <header id="profile_header">
             <div id="mySidebar" class="sidebar justify-content-end">
-            <a href="#" class="closebtn" id="closebtn">&times;</a>
-            <a href="createGame.php" class="sidebarField">Crea partita</a>
+                <a href="#" class="closebtn" id="closebtn">&times;</a>
+                <a href="createGame.php" class="sidebarField">Crea partita</a>
                 <a href="createTournament.php" class="sidebarField">Crea torneo</a>
                 <a href="createTeam.php" class="sidebarField">Crea team</a>
                 <a href="manageTournaments.php" class="sidebarField">Gestisci tornei</a>
                 <a href="manageTeams.php" class="sidebarField">Gestisci teams</a>
-                <a href="statisticPage.php" class="sidebarField">Statistiche generali</a>
+                <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Statistiche generali</a>
+                <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca giocatori</a>                    
                 <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">
@@ -46,52 +47,43 @@ include '../../PHP/Utils/auth_request.php';
                     <div class="row w-100 mt-3">
                         <div class="col-2"></div>
                         <div class="col-4 d-flex justify-content-start align-items-center">
-                            <label for="usernameHost">Host partita:</label>
-                            <input type="text" id="usernameHost" name="usernameHost" class="form-control ml-2">
+                            <label for="gameName">Nome partita:</label>
+                            <input type="text" id="gameName" name="gameName" class="form-control ml-2">
                         </div>
                         <div class="col-4 d-flex justify-content-end align-items-center">
                             <label for="participants">Partecipanti:</label>
                             <select id="participants" name="participants" class="form-control ml-2">
-                                <?php for ($i = 2; $i <= 10; $i++): ?>
+                                <?php for ($i = 2; $i <= 8; $i++): ?>
                                     <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
                                 <?php endfor; ?>
                             </select>
                         </div>
                         <div class="col-2"></div>
                     </div>
-                    <div class="row w-100 mt-3">
-                        <div class="col-2"></div>
-                        <div class="col-4 d-flex justify-content-start align-items-center">
-                            <label for="matches">Num match:</label>
-                            <select id="matches" name="matches" class="form-control ml-2">
-                                <?php for ($i = 1; $i <= 4; $i++): ?>
-                                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-                                <?php endfor; ?>
-                            </select>
-                        </div>
-                        <div class="col-5 d-flex justify-content-start align-items-center">
-                            <label for="visibility" style="padding-right: 40px;">Visibilità:</label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="visibility" id="public" value="public" checked>
-                                <label class="form-check-label" for="public">Pubblica</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="visibility" id="friends" value="friends">
-                                <label class="form-check-label" for="friends">Amici</label>
-                            </div>
-                        </div>
-                        <div class="col-2"></div>
+
+                    <!-- Lista dei partecipanti dinamica -->
+                    <div id="participantsList" class="mt-3">
+                        <!-- I campi per i partecipanti saranno aggiunti dinamicamente qui -->
                     </div>
-                    
+
                     <div class="row w-100 mt-4">
                         <div class="col-12 d-flex justify-content-center">
-                            <button type="button" class="btn btn-primary">Crea partita</button>
+                            <button type="button" class="btn btn-primary" id="createGameButton">Crea partita</button>
                         </div>
                     </div>
+                </div>
+                <div id="errorPopup" style="display:none; position:fixed; bottom:10px; left:50%; transform:translateX(-50%); background-color:red; color:white; padding:10px; border-radius:5px; z-index:1000;">
+                    <!-- Error message will be displayed here -->
+                </div>
+                <div id="successPopup" style="display:none; position:fixed; bottom:10px; left:50%; transform:translateX(-50%); background-color:green; color:white; padding:10px; border-radius:5px; z-index:1000;">
+                    <!-- Success message will be displayed here -->
                 </div>
             </div>
         </main>
     </div>
+
+    <script src="../../JAVASCRIPT/Utils/sidenav.js" type="module"></script>
+    <script src="../../JAVASCRIPT/AdminProfile/createGame.js" type="module"></script>
 </body>
-<script src="../../JAVASCRIPT\Utils\sidenav.js" type="module"></script>
+
 </html>

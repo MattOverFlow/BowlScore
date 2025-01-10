@@ -21,10 +21,11 @@
                     <a href="#" class="closebtn" id="closebtn">&times;</a>
                     <a href="cardAndSubscription.php" class="sidebarField">Carte e abbonamenti</a>
                     <a href="historyMatchPage.php" class="sidebarField">Storico partite</a>
-                    <a href="#" class="sidebarField">Storico tornei</a>
+                    <a href="historyTournaments.php" class="sidebarField">Storico tornei</a>
                     <a href="matchPage.php" class="sidebarField">Partite</a>
                     <a href="userpage.php" class="sidebarField">Profilo</a>
-                    <a href="searchPage.php" class="sidebarField">Cerca</a>                    
+                    <a href="searchPage.php" class="sidebarField">Cerca</a>
+                    <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Statistiche generali</a>                 
                     <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
                 </div>
                 <button class="openbtn" id="openbtn">
@@ -56,7 +57,7 @@
         </div>
     </body>
     <script src="../../JAVASCRIPT\Utils\sidenav.js" type="module"></script>
-    <script src="../../JAVASCRIPT/Profile/searchPage.js" type="module"></script>    
+    <script src="../../JAVASCRIPT/Profile/searchPage.js" type="module"></script>
 </html>
 
 

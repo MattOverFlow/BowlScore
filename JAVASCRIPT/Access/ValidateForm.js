@@ -39,9 +39,6 @@ document.getElementById('FormRegistration').addEventListener('submit', async fun
         if(!username || regexExtended.test(username)) {
             document.getElementById('usernameSpecialChar').style.display = 'block';
             isValid = false;
-        } else if (!(await checkUsername(username))) {
-            document.getElementById('usernameNotAvaible').style.display = 'block';
-            isValid = false;
         }
     }
 
@@ -78,27 +75,8 @@ document.getElementById('FormRegistration').addEventListener('submit', async fun
     }
 });
 
-
-async function checkUsername(username) {
-    const response = await fetch('../../PHP/Access/CheckUsername.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `username=${username}`,
-    });
-
-    const data = await response.text();
-
-    if (data === "Username_exist") {
-        return false;
-    }
-
-    return true;
-}
-
 async function checkEmail(email) {
-    const response = await fetch('../../PHP/Access/CheckEmail.php', {
+    const response = await fetch('../../PHP/Process/checkEmail.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

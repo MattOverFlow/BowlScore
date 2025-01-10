@@ -1,5 +1,11 @@
 <?php
 include '../../PHP/Utils/auth_request.php';
+include '../../PHP/Database/User.php';
+
+$useridUtente = $_GET['useridUtente'];
+$nFollower = numeroFollower($useridUtente);
+$nSeguiti = numeroSeguiti($useridUtente);
+$info = scaricaUtente($useridUtente);
 ?>
 
 <!DOCTYPE html>
@@ -21,13 +27,6 @@ include '../../PHP/Utils/auth_request.php';
         <header id="profile_header">
             <div id="mySidebar" class="sidebar justify-content-end">
                 <a href="#" class="closebtn" id="closebtn">&times;</a>
-                <a href="cardAndSubscription.php" class="sidebarField">Carte e abbonamenti</a>
-                    <a href="historyMatchPage.php" class="sidebarField">Storico partite</a>
-                    <a href="#" class="sidebarField">Storico tornei</a>
-                    <a href="matchPage.php" class="sidebarField">Partite</a>
-                    <a href="userpage.php" class="sidebarField">Profilo</a>
-                    <a href="searchPage.php" class="sidebarField">Cerca</a>                    
-                    <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48.6" height="32" viewBox="0 0 76 50" fill="none">
@@ -42,33 +41,159 @@ include '../../PHP/Utils/auth_request.php';
             <div id="user_info">
                 <div class="row justify-content-center gy-2">
                     <div class="col-auto text-center">
-                        <p id="username">Username</p>
+                        <p id="username"><?php echo $info["username"]?></p>
                         <div class="row justify-content-center" id="user_number">
                             <button type="button" class="btn col-auto pt-0 pb-0 text-center" id="followers">
                                 <p>Amici</p>
-                                <p id="nAmici">0</p>
+                                <p id="nFollower"><?php echo $nFollower?></p>
+                            </button>
+                            <button type="button" class="btn col-auto pt-0 pb-0 text-center" id="seguiti">
+                                <p>Seguiti</p>
+                                <p id="nSeguiti"><?php echo $nSeguiti?></p>
                             </button>
                         </div>
                         <!-- Sposta il bottone qui sotto -->
                         <div class="row justify-content-center mt-2">
-                            <button class="btn btn-primary" id="followButtonNotFollow" style="width: 86%;">segui</button>
+                            <button class="btn btn-primary" id="followButtonNotFollow" value="follow" style="width: 86%;">follow</button>
                         </div>
                     </div>
                     <div class="col-auto name_surname" id="user_name_surname_box">
-                        <p id="name_surname">Nome Cognome</p>
+                        <p id="name_surname"><?php echo $info['nome'] . " " . $info['cognome']; ?></p>
                     </div>
+                </div>
+            </div>
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <div class="col-8" id="playerStatistics">
+                    <h2>Statistiche del Giocatore</h2>
+                    <ul>
+                        <li>Punteggio Medio (Average Score): <span id="averageScore">N/A</span></li>
+                        <li>Strike Rate (Percentuale di Strike): <span id="strikeRate">N/A</span></li>
+                        <li>Spare Rate (Percentuale di Spare): <span id="spareRate">N/A</span></li>
+                        <li>Punteggio Massimo in una Partita (High Game): <span id="highGame">N/A</span></li>
+                        <li>Serie Massima (High Series): <span id="highSeries">N/A</span></li>
+                        <li>First Ball Average: <span id="firstBallAverage">N/A</span></li>
+                        <li>Clean Game: <span id="cleanGame">N/A</span></li>
+                        <li>Percentuale di Frame Puliti (Clean Frame Percentage): <span id="cleanFramePercentage">N/A</span></li>
+                        <li>Differenziale di Punteggio (Score Differential): <span id="scoreDifferential">N/A</span></li>
+                    </ul>
                 </div>
             </div>
         </main>
     </div>
-    <!-- <script src="../../JAVASCRIPT/Profile/userpage.js" type="module"></script> -->
 </body>
 <script src="../../JAVASCRIPT\Utils\sidenav.js" type="module"></script>
+
+
+<!-- Script per bottoni dei numeri dei follower e dei seguiti -->
 <script>
+    const useridUtente = "<?php echo $useridUtente; ?>";
+
+    function getUrlParams() {
+        const params = {};
+        const queryString = window.location.search.substring(1);
+        const regex = /([^&=]+)=([^&]*)/g;
+        let m;
+        while (m = regex.exec(queryString)) {
+            params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+        }
+        return params;
+    }
+
+    // Ottieni i parametri dell'URL
+    const urlParams = getUrlParams();
+    const isAdmin = urlParams.type === 'admin';
+
     document.getElementById("followers").addEventListener("click", function() {
-        var username = document.getElementById("username").innerText;
-        window.location.href = `friendList.php?username=${username}`;
+        var newUrl = `followerPage.php?useridUtente=${useridUtente}`;
+        if (isAdmin) {
+            newUrl += '&type=admin';
+        }
+        window.location.href = newUrl;
+    });
+
+    document.getElementById("seguiti").addEventListener("click", function() {
+        var newUrl = `followedPage.php?useridUtente=${useridUtente}`;
+        if (isAdmin) {
+            newUrl += '&type=admin';
+        }
+        window.location.href = newUrl;
     });
 </script>
 <script src="../../JAVASCRIPT/Profile/friendPage.js" type="module"></script>
+
+
+<!-- Script per il bottone di follow/unfollow -->
+<script>
+    async function checkFollow() {
+        const userID = "<?php echo $_SESSION['userid']; ?>";
+        const useridUtente = "<?php echo $useridUtente; ?>";
+
+        button = document.getElementById("followButtonNotFollow");
+
+        const response = await fetch('../../PHP/Utente/checkFollow.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `userId=${userID}&useridUtente=${useridUtente}`
+            });
+
+            const data = await response.json();
+
+        if(data === true) {
+            button.innerHTML = "unfollow";
+            button.classList.remove("btn-primary");
+            button.classList.add("btn-secondary");
+        } else {
+            button.innerHTML = "follow";
+            button.classList.remove("btn-secondary");
+            button.classList.add("btn-primary");
+        }
+    }
+
+    checkFollow();
+
+    document.getElementById("followButtonNotFollow").addEventListener("click",async function() {
+        const button = this;
+        var type = button.innerHTML;
+        var userID = "<?php echo $_SESSION['userid']; ?>";
+        var useridUtente = "<?php echo $useridUtente; ?>";
+
+        if(type === "follow") {
+            const response = await fetch('../../PHP/Utente/followUser.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `userId=${userID}&useridUtente=${useridUtente}`
+                });
+
+            if(response.ok) {
+            button.innerHTML = "unfollow";
+            button.classList.remove("btn-primary");
+            button.classList.add("btn-secondary");
+            }
+            else {
+                throw new Error('Errore');
+            }
+        } else {
+            const response = await fetch('../../PHP/Utente/unfollowUser.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `userId=${userID}&useridUtente=${useridUtente}`
+                });
+
+            if(response.ok) {
+            button.innerHTML = "follow";
+            button.classList.remove("btn-secondary");
+            button.classList.add("btn-primary");
+            }
+            else {
+                throw new Error('Errore');
+            }
+        }
+            });
+</script>
 </html>

@@ -65,7 +65,7 @@ main {
     line-height: 1.5;
 }
 
-#followers, #following {
+#followers, #seguiti {
     margin-left: 2px;
     border-radius: 9px;
     border-color: #999;
@@ -289,4 +289,53 @@ li {
     background-color: #5AA9E6 !important;
     border: #333 solid 2px;
     border-radius: 10px;
+}
+
+#simulateBlock {
+    background-color: #5AA9E6 !important;
+    border: #333 solid 2px;
+    border-radius: 10px;
+}
+
+/* Aggiungi i seguenti stili per la sezione delle statistiche del giocatore */
+#playerStatistics {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#playerStatistics h2 {
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+}
+
+#playerStatistics ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#playerStatistics li {
+    font-family: 'Lora', serif;
+    font-weight: 400;
+    margin-bottom: 10px;
+    color: #555;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+#playerStatistics li:last-child {
+    border-bottom: none;
+}
+
+#playerStatistics span {
+    font-weight: 700;
+    color: #000;
 }

@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var rankingDiv = document.createElement("div");
         rankingDiv.className = "ranking";
         rankingDiv.innerHTML = `
-            <div class="ranking-container mt-5">
+            <div class="ranking-container mt-5 mb-5">
                 <div class="second-place">
                     <div class="name">${totalPoints[1].name}</div>
                     <div class="points">${totalPoints[1].total} p.</div>
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        mainTag.appendChild(rankingDiv);
+        mainTag.insertBefore(rankingDiv, mainTag.firstChild);
     }
 
     // Simula le partite al caricamento della pagina

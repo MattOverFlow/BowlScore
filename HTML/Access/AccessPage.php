@@ -1,6 +1,6 @@
 <?php
     if(isset($_COOKIE['token'])) {
-        header('Location: ../../HTML/Profile/userpage.php');
+        header('Location: ../../HTML/UserProfile/userpage.php');
     }
 ?>
 

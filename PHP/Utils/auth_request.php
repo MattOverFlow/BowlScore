@@ -1,17 +1,18 @@
 <?php
     include_once(__DIR__ . "/bootstrap.php");
-    include_once(__DIR__ . "/../Database/AccessDB.php");
+    include_once(__DIR__ . "/../Database/Login.php");
     sec_session_start();
-
-    return;
 
     if(!isset($_COOKIE['token'])) {
         header('Location: ../../HTML/Access/LoginPage.php');
         exit;
     } 
     try {
-        $username = retrieveUsername_from_token($_COOKIE["token"]);
-        $_SESSION['username'] = $username;
+        $userid = $_COOKIE['token'];
+        $_SESSION['userid'] = $userid;
+        if (!isset($_SESSION['nome'])){
+            scaricaInfoUser($_SESSION['userid']);
+        }
     } catch (Exception $e) {
         header('Content-Type: application/json');
         echo json_encode(array("error" => "Invalid token"));

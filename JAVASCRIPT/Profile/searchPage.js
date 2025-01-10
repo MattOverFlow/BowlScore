@@ -1,36 +1,49 @@
-document.addEventListener("DOMContentLoaded", function() {
+// Funzione per ottenere i parametri dell'URL
+function getUrlParams() {
+    const params = {};
+    const queryString = window.location.search.substring(1);
+    const regex = /([^&=]+)=([^&]*)/g;
+    let m;
+    while (m = regex.exec(queryString)) {
+        params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+    }
+    return params;
+}
 
-    var userList = [
-        {
-            "username": "capo1",
-            "nome": "Mario",
-            "cognome": "Rossi",
-            "isFriend": true
+async function fetchUserList(query) {
+    const response = await fetch('../../PHP/Utente/userSearchQuery.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
         },
-        {
-            "username": "capo2",
-            "nome": "Luigi",
-            "cognome": "Verdi",
-            "isFriend": false
-        },
-        {
-            "username": "capo3",
-            "nome": "Giovanni",
-            "cognome": "Bianchi",
-            "isFriend": true
-        }
-    ];
+        body: `stringa=${query}`,
+    });
 
-    var searchList = document.getElementById("searchList");
-    var searchInput = document.getElementById("searchInput");
-    var usernameLabel = document.getElementById("usernameLabel");
+    const data = await response.json();
+    console.log("Ecco i data:\n"+data);
+    if(data.error === 'No users found'){
+        return null;
+    } else {
+        return data;
+    }
+}
 
-    searchInput.addEventListener("input", function() {
-        var query = searchInput.value.toLowerCase();
-        searchList.innerHTML = ''; // Clear previous results
-        usernameLabel.style.display = 'none'; // Hide the "Username non trovato" message
 
-        var found = false;
+// Ottieni i parametri dell'URL
+const urlParams = getUrlParams();
+
+// Verifica se il parametro 'type' è 'admin'
+const isAdmin = urlParams.type === 'admin';
+
+var searchInput = document.getElementById("searchInput");
+var usernameLabel = document.getElementById("usernameLabel");
+
+searchInput.addEventListener("input", async function() {
+    var query = searchInput.value.toLowerCase();
+    searchList.innerHTML = '';
+    usernameLabel.style.display = 'none';
+    if (query || query.length > 0) {
+        var userList = await fetchUserList(query);
 
         userList.forEach(function(user) {
                 var row = document.createElement("div");
@@ -41,13 +54,17 @@ document.addEventListener("DOMContentLoaded", function() {
                     <div class="col-md-3 fullname">${user.cognome}</div>
                 `;
                 row.addEventListener("click", function() {
-                    window.location.href = `friendPage.php?username=${user.username}`;
+                    window.location.href = isAdmin 
+                        ? `../UserProfile/friendPage.php?useridUtente=${user.userid}&type=admin` 
+                        : `friendPage.php?useridUtente=${user.userid}`;
                 });
                 searchList.appendChild(row);
         });
-        if (!found) {
-            usernameLabel.style.display = 'block'; // Show the "Username non trovato" message
-        }
-    });
 
+        if (userList === null) {
+            usernameLabel.style.display = 'block'; 
+        }
+    } else {
+        usernameLabel.style.display = 'block';
+    }
 });

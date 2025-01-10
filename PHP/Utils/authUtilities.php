@@ -1,18 +1,8 @@
 <?php 
-    use Firebase\JWT\JWT;
 
-    function generate_token($username) {
-        $key = getenv("JWTKEY");
-        $payload = array(
-            "username" => $username,
-        );
-        $jwt = JWT::encode($payload, $key, 'HS256');
-        return $jwt;
-    }
-
-    function set_token_cookie($username, $remember = "off") {
+    function set_token_cookie($userid, $remember) {
         $cookie_name = "token";
-        $cookie_value = "Bearer ".generate_token($username);
+        $cookie_value = $userid;
         $cookie_options = array(
             'path' => '/',
             'secure' => true,

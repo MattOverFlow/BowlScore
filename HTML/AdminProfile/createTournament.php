@@ -22,7 +22,8 @@
                 <a href="createTeam.php" class="sidebarField">Crea team</a>
                 <a href="manageTournaments.php" class="sidebarField">Gestisci tornei</a>
                 <a href="manageTeams.php" class="sidebarField">Gestisci teams</a>
-                <a href="statisticPage.php" class="sidebarField">Statistiche generali</a>
+                <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Statistiche generali</a>
+                <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca giocatori</a>                    
                 <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">
@@ -65,9 +66,15 @@
                     </div>
                 </div>
             </div>
+            <div id="errorPopup" style="display:none; position:fixed; bottom:10px; left:50%; transform:translateX(-50%); background-color:red; color:white; padding:10px; border-radius:5px; z-index:1000;">
+                    <!-- Error message will be displayed here -->
+                </div>
+                <div id="successPopup" style="display:none; position:fixed; bottom:10px; left:50%; transform:translateX(-50%); background-color:green; color:white; padding:10px; border-radius:5px; z-index:1000;">
+                    <!-- Success message will be displayed here -->
+                </div>
         </main>
     </div>
 </body>
 <script src="../../JAVASCRIPT/Utils/sidenav.js" type="module"></script>
-<script src="../../JAVASCRIPT/AdminProfile/createTournament.js"></script>
+<script src="../../JAVASCRIPT/AdminProfile/createTournament.js" type="module"></script>
 </html>

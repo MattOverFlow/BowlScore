@@ -1,9 +1,15 @@
 <?php
-    if(isset($_COOKIE['token'])) {
-        header('Location: ../../HTML/Profile/userpage.php');
+    if (isset($_COOKIE['token'])) {
+        header('Location: ../../HTML/UserProfile/userpage.php');
+        exit;
+    }
+
+    // Controlla se c'è un errore nella query string
+    $errorMessage = '';
+    if (isset($_GET['error']) && $_GET['error'] === 'wrong_credentials') {
+        $errorMessage = 'Email o password non corretti. Riprova.';
     }
 ?>
-
 <!DOCTYPE html>
 <html lang="it">
     <head>
@@ -24,7 +30,15 @@
                     <div id="BlockBanner" class="d-flex justify-content-center align-items-center w-100">
                         Login
                     </div>
-                    <form id="loginForm" action="../../PHP/Access/ProcessLogin.php" method="POST" novalidate>
+
+                    <!-- Mostra il messaggio di errore se presente -->
+                    <?php if (!empty($errorMessage)): ?>
+                        <div class="alert alert-danger text-center col-9 mt-3 mx-auto" style="max-width: 400px;">
+                            <?= htmlspecialchars($errorMessage) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form id="loginForm" action="../../PHP/Process/processLogin.php" method="POST" novalidate>
                         <div class="d-flex justify-content-center">
                             <div class="col-9 mb-2 mt-4 d-flex flex-column justify-content-center">
                                 <label for="email" class="form-label">Email</label>
@@ -51,17 +65,16 @@
                         <div class="d-flex justify-content-center">
                             <div id="error-message" class="error-message d-none"></div>
                         </div>
-                        <div class="d-flex justify-content-center mt-2 ">
+                        <div class="d-flex justify-content-center mt-2">
                             <button class="btn btn-primary" type="submit">Login</button>
                         </div>
                     </form>
                     <div class="d-flex justify-content-center mt-3">
-                        <a id=RegisterLink href="RegistrationPage.php">Don't have an account? Register here</a>
+                        <a id="RegisterLink" href="RegistrationPage.php">Don't have an account? Register here</a>
                     </div>
                 </div>
             </div>
         </div>
-        <script src="../../JAVASCRIPT/Access/Login.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     </body>
 </html>
