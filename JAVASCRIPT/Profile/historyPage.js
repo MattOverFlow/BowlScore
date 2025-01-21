@@ -1,82 +1,37 @@
-document.addEventListener('DOMContentLoaded', function() {
-
-    var matchList = document.getElementById("matchList");
-
-    var prova = [
-        {
-            "numeroPartite": 5,
-            "numeroPersone": 10,
-            "numeroPersoneEntrate": 7,
-            "tipoPartita": "pubblica",
-            "host": "capo1",
-            "id" : 1
-        },
-        {
-            "numeroPartite": 3,
-            "numeroPersone": 6,
-            "numeroPersoneEntrate": 2,
-            "tipoPartita": "amici",
-            "host": "capo2",
-            "id" : 2
-        },
-        {
-            "numeroPartite": 8,
-            "numeroPersone": 5,
-            "numeroPersoneEntrate": 3,
-            "tipoPartita": "pubblica",
-            "host": "capo3",
-            "id" : 3
-        }
-    ];
-
-    var user = {
-        "username": "capo3",
-        "amici": [
-            { "username": "capo2" }
-        ]
-    };
+document.addEventListener('DOMContentLoaded', function () {
 
     var mainTag = document.querySelector("main");
 
-    if (mainTag) {
-        prova.forEach(function(match) {  
+    function renderMatch(matchList) {
+
+        matchList.forEach(function (match) {
 
             mainTag.innerHTML += `
-                <div id="MainBlock" class="col-5 flex-column justify-content-center align-items-center mb-3 pb-4">
+                <div id="MainBlock" class="col-5 d-flex flex-column justify-content-center align-items-center mb-3 pb-4">
                     <div id="BlockBanner" class="d-flex justify-content-center align-items-center w-100">
-                        Partita di ${match.host}
+                        Partita: ${match.nome}
                     </div>
-                    <div class="container mt-3">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="p-3 border bg-light infoblock">
-                                    <h5>Numero di match totali da giocare</h5>
-                                    <p id="totalGames">${match.numeroPartite}</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-3 border bg-light infoblock">
-                                    <h5>Numero di persone entrate</h5>
-                                    <p id="peopleEntered">${match.numeroPersoneEntrate}/${match.numeroPersone}</p>
+                    <div class="container d-flex flex-column justify-content-center align-items-center mt-3">
+                        <div class="row w-100 d-flex justify-content-center">
+                            <div class="col-12 d-flex justify-content-center">
+                                <div class="p-3 border bg-light infoblock text-center">
+                                    <h5>Numero di partecipanti</h5>
+                                    <p id="totalGames">${match.numeroGiocatori}</p>
+                                    <h5 class="mt-3">Data di svolgimento</h5>
+                                    <p id="tournamentDate">${new Date(match.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="p-3 border bg-light infoblock">
-                                    <h5>Pubblica o solo per amici</h5>
-                                    <p id="gameType">${match.tipoPartita}</p>
-                                </div>
-                            </div>
-                             <div class="col-md-6 d-flex justify-content-center align-items-center">
-                    <button type="button" class="btn btn-primary viewDetailsButton" data-match-id="${match.id}">Vedi Dettagli</button>
+                        <div class="row mt-3 w-100 d-flex justify-content-center">
+                            <div class="col-12 d-flex justify-content-center">
+                                <button type="button" class="btn btn-primary viewDetailsButton" data-match-id="${match.id}">Vedi Dettagli</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            `;
-            document.querySelectorAll('.viewDetailsButton').forEach(function(button) {
-                button.addEventListener('click', function() {
+        `;
+            document.querySelectorAll('.viewDetailsButton').forEach(function (button) {
+                button.addEventListener('click', function () {
                     var matchId = this.getAttribute('data-match-id');
                     window.location.href = `detailedMatchPage.php?matchId=${matchId}`;
                 });
@@ -84,9 +39,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    const searchButton = document.getElementById("searchButton");
 
+    searchButton.addEventListener("click", async function () {
+
+        const searchInput = document.getElementById('searchInput').value.trim();
+
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+
+        const query = new URLSearchParams({
+            searchInput: searchInput && searchInput !== "" ? searchInput : null,
+            startDate: startDate && startDate !== "" ? startDate : null,
+            endDate: endDate && endDate !== "" ? endDate : null,
+            username: "###"
+        }).toString();
+
+
+        const response = await fetch('../../PHP/Torneo/RicercaStoricoPartite.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: query,
+        });
+
+        const data = await response.json();
+
+        mainTag.innerHTML = "";
+
+        renderMatch(data);
+
+    });
 
 });
-
-
 

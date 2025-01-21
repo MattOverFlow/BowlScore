@@ -207,7 +207,7 @@ function rimuoviTransazioni($userid)
 }
 
 # Funzione per aggiorna il numero di partite totali di un utente
-function aggiornaPartiteTotali($userid, $partiteAggiuntive)
+function aggiungiPartiteTotali($userid, $partiteAggiuntive)
 {
     $db = getDb();
 
@@ -232,8 +232,33 @@ function aggiornaPartiteTotali($userid, $partiteAggiuntive)
     $stmt->close();
 }
 
+function aggiornaPartiteTotali($userid)
+{
+    $db = getDb();
 
-# Funzione per scaricare i pacchetti partite
+    $datiCarta = datiCarta($userid);
+
+    $partiteTotali = (int)$datiCarta['partiteTotali'] - 1;
+
+
+    $query = "UPDATE carta SET PartiteTotali = ? WHERE CodiceUtente = ?";
+
+    $stmt = $db->prepare($query);
+    $stmt->bind_param("is", $partiteTotali, $userid);
+
+    if ($stmt->execute()) {
+        echo "Partite totali aggiornate con successo!";
+        $stmt->close();
+        return true;
+    } else {
+        echo "Errore nell'aggiornamento: " . $stmt->error;
+        $stmt->close();
+        return false;
+    }
+
+}
+
+
 function downloadPacchetti()
 {
     $db = getDb();

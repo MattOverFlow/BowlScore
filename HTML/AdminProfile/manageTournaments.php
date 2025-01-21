@@ -6,7 +6,7 @@ include '../../PHP/Utils/auth_request.php';
 <html lang="it">
 
 <head>
-    <title>BowlScore - Gestisci tornei</title>
+    <title>BowlScore - Storico tornei</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -25,9 +25,9 @@ include '../../PHP/Utils/auth_request.php';
             <a href="createGame.php" class="sidebarField">Crea partita</a>
                 <a href="createTournament.php" class="sidebarField">Crea torneo</a>
                 <a href="createTeam.php" class="sidebarField">Crea team</a>
-                <a href="manageTournaments.php" class="sidebarField">Gestisci tornei</a>
-                <a href="manageTeams.php" class="sidebarField">Gestisci teams</a>
-                <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Statistiche generali</a>
+                <a href="manageTournaments.php" class="sidebarField">Storico tornei</a>
+                <a href="manageTeams.php" class="sidebarField">Gestione teams</a>
+                <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Classifiche generali</a>
                 <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca giocatori</a>                    
                 <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
@@ -40,9 +40,75 @@ include '../../PHP/Utils/auth_request.php';
             </button>
         </header>
         <div class="col-12 d-flex justify-content-center mt-4">
-            <div class="col-9 d-flex flex-column justify-content-center align-items-center mb-3">
-                <label for="searchInput" class="visually-hidden">Cerca torneo:</label>
-                <input class="input-grey-rounded form-control" type="text" id="searchInput" placeholder="Cerca torneo...">
+            <div class="col-9 d-flex flex-column justify-content-center align-items-center mb-3 p-4 border rounded shadow-sm bg-light">
+                <div class="d-flex align-items-center w-100 mb-3">
+                    <label for="searchInput" class="form-label me-3">Cerca torneo:</label>
+                    <input class="input-grey-rounded form-control me-3" type="text" id="searchInput" placeholder="Cerca torneo...">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="toggleFilters" onclick="toggleFiltersVisibility()">
+                        <label class="form-check-label" for="toggleFilters">Aggiungi filtri</label>
+                    </div>
+                </div>
+
+                <!-- Contenitore dei filtri -->
+                <div id="filtersContainer" class="col-7 mt-5" style="display: none;">
+                    <div class="d-flex w-100 mb-3">
+                        <label for="tournamentType" class="form-label mt-1 me-4">Tipo torneo:</label>
+                        <select class="form-select form-select-sm w-50" id="tournamentType" onchange="toggleFilters()">
+                            <option value="">Seleziona</option>
+                            <option value="singolo">Singolo</option>
+                            <option value="squadre">Squadre</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtri per il periodo -->
+                    <div class="d-flex justify-content-between w-100 mb-3" id="dateFilters">
+                        <div class="me-2 w-50">
+                            <label for="startDate" class="form-label">Periodo inizio:</label>
+                            <input type="date" class="form-control" id="startDate">
+                        </div>
+                        <div class="w-50">
+                            <label for="endDate" class="form-label">Periodo fine:</label>
+                            <input type="date" class="form-control" id="endDate">
+                        </div>
+                    </div>
+
+                    <!-- Filtri per torneo squadre -->
+                    <div class="w-100 mb-3" id="teamFilters" style="display: none;">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="me-2 w-50">
+                                <label for="numTeams" class="form-label">Numero di team:</label>
+                                <select class="form-control" id="numTeams">
+                                    <option value="" disabled selected>Seleziona</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                            <div class="w-50">
+                                <label for="teamSize" class="form-label">Dimensione dei team:</label>
+                                <select class="form-control" id="teamSize">
+                                    <option value="" disabled selected>Seleziona</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-3 align-items-center">
+                            <label for="teamName" class="form-label me-4 mt-2">Nome team:</label>
+                            <input type="text" class="form-control input-grey-rounded" id="teamName">
+                        </div>
+                    </div>
+
+                    <!-- Filtri per torneo singolo -->
+                    <div class="w-100 mb-3" id="singleFilters" style="display: none;">
+                        <label for="username" class="form-label">Cerca username:</label>
+                        <input type="text" class="form-control input-grey-rounded" id="usernameField">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary w-50 mt-4" id="searchButton">Cerca</button>
             </div>
         </div>
         <main class="pt-3 d-flex flex-column align-items-center">
@@ -51,4 +117,36 @@ include '../../PHP/Utils/auth_request.php';
 </body>
 <script src="../../JAVASCRIPT/Utils/sidenav.js" type="module"></script>
 <script src="../../JAVASCRIPT/AdminProfile/manageTournaments.js" type="module"></script>
+<script>
+    function toggleFiltersVisibility() {
+        const filtersContainer = document.getElementById('filtersContainer');
+        const toggleCheckbox = document.getElementById('toggleFilters');
+        const searchButton = document.getElementById('searchButton');
+        
+        filtersContainer.style.display = toggleCheckbox.checked ? 'block' : 'none';
+        if (toggleCheckbox.checked) {
+        searchButton.innerHTML = 'Applica filtri';
+        } else {
+            searchButton.innerHTML = 'Cerca';
+        }
+    }
+
+    function toggleFilters() {
+        const tournamentType = document.getElementById('tournamentType').value;
+        const teamFilters = document.getElementById('teamFilters');
+        const singleFilters = document.getElementById('singleFilters');
+
+        // Nascondi o mostra i filtri in base al tipo di torneo
+        if (tournamentType === 'squadre') {
+            teamFilters.style.display = 'block';
+            singleFilters.style.display = 'none';
+        } else if (tournamentType === 'singolo') {
+            teamFilters.style.display = 'none';
+            singleFilters.style.display = 'block';
+        } else {
+            teamFilters.style.display = 'none';
+            singleFilters.style.display = 'none';
+        }
+    }
+</script>
 </html>

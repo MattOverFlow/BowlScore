@@ -21,13 +21,12 @@ include '../../PHP/Utils/auth_request.php';
         <header id="profile_header">
             <div id="mySidebar" class="sidebar justify-content-end">
                 <a href="#" class="closebtn" id="closebtn">&times;</a>
-                <a href="cardAndSubscription.php" class="sidebarField">Carte e abbonamenti</a>
+                <a href="cardAndSubscription.php" class="sidebarField">Carta e abbonamenti</a>
                     <a href="historyMatchPage.php" class="sidebarField">Storico partite</a>
                     <a href="historyTournaments.php" class="sidebarField">Storico tornei</a>
-                    <a href="matchPage.php" class="sidebarField">Partite</a>
                     <a href="userpage.php" class="sidebarField">Profilo</a>
-                    <a href="searchPage.php" class="sidebarField">Cerca</a>
-                    <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Statistiche generali</a>
+                    <a href="searchPage.php" class="sidebarField">Cerca utenti</a>
+                    <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Classifiche generali</a>
                     <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">
@@ -38,7 +37,7 @@ include '../../PHP/Utils/auth_request.php';
                 </svg>
             </button>
         </header>
-        <main class="pt-3 d-flex flex-column align-items-center" id="matchList">
+        <main class="pt-3 d-flex flex-column align-items-center" id="mainMatch">
     
         </main>
     </div>

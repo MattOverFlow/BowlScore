@@ -1,17 +1,32 @@
-document.addEventListener('DOMContentLoaded', function() {
-    var infoTorneo = {
-        "nome": "CiccioCup",
-        "data": "01/01/2021",
-        "tipo": "Teams",
-        "numElementiTeam": 3,
-        "teams": [
-            { "nome": "Team1", "players": ["Alberto 1", "Mario 2", "Luigi 3"] },
-            { "nome": "Team2", "players": ["Luca 4", "Giovanni 5", "Paolo 6"] },
-            { "nome": "Team3", "players": ["Stefano 7", "Andrea 8", "Giuseppe 9"] },
-            { "nome": "Team4", "players": ["Giorgio 10", "Antonio 11", "Francesco 12"] }
-        ]
-    };
+async function downloadTorneo(idTorneo) {
+    const response = await fetch('../../PHP/Torneo/ScaricaTorneoSquadre.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `idTorneo=${idTorneo}`,
+    });
 
+    const data = await response.json();
+    console.log(data);
+    return data;
+}
+
+async function downloadTeamsTorneo(idTorneo) {
+    const response = await fetch('../../PHP/Team/TeamsTorneo.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `idTorneo=${idTorneo}`,
+    });
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+}
+
+document.addEventListener('DOMContentLoaded', async function () {
     var mainTag = document.querySelector("main");
 
     function getUrlParams() {
@@ -25,123 +40,99 @@ document.addEventListener('DOMContentLoaded', function() {
         return params;
     }
 
-    // Ottieni i parametri dell'URL
     const urlParams = getUrlParams();
     const isUser = urlParams.type === 'user';
     const sidebar = document.getElementById('mySidebar');
+    const idTorneo = urlParams.idTorneo;
+    const datiTorneo = await downloadTorneo(idTorneo);
+    var torneo = datiTorneo.torneo;
+    var memberTeams = datiTorneo.teams;
 
-    if (isUser) {
+    var TeamsTournament = await downloadTeamsTorneo(idTorneo);
 
-        sidebar.innerHTML = `
-            <a href="#" class="closebtn" id="closebtn">&times;</a>
-            <a href="../UserProfile/cardAndSubscription.php" class="sidebarField">Carte e abbonamenti</a>
-            <a href="../UserProfile/historyMatchPage.php" class="sidebarField">Storico partite</a>
-            <a href="../UserProfile/historyTournaments.php" class="sidebarField">Storico tornei</a>
-            <a href="../UserProfile/matchPage.php" class="sidebarField">Partite</a>
-            <a href="../UserProfile/userpage.php" class="sidebarField">Profilo</a>
-            <a href="../UserProfile/searchPage.php" class="sidebarField">Cerca</a>    
-            <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Statistiche generali</a>
-            <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
-        `;
+    var standingFinale = {};
 
-    }
-
-    function generateScores() {
-        let scores = [];
-        for (let round = 1; round <= 10; round++) {
-            let time1 = Math.floor(Math.random() * 11);
-            let time2 = 0;
-            let total = 0;
-            if (time1 === 10) { // Strike
-                time2 = '';
-                total = 10;
-            } else {
-                time2 = Math.floor(Math.random() * (11 - time1));
-                if (time1 + time2 === 10) { // Spare
-                    total = 10;
-                } else {
-                    total = time1 + time2;
-                }
-            }
-            scores.push({ time1, time2, total });
-        }
-
-        // Gestione dei lanci extra nell'ultimo frame
-        let lastFrame = scores[9];
-        if (lastFrame.time1 === 10) { // Strike
-            lastFrame.extra1 = Math.floor(Math.random() * 11);
-            lastFrame.extra2 = Math.floor(Math.random() * 11);
-        } else if (lastFrame.time1 + lastFrame.time2 === 10) { // Spare
-            lastFrame.extra1 = Math.floor(Math.random() * 11);
-        }
-
-        return scores;
-    }
-
-    function calculateTotal(scores) {
-        let cumulativeTotal = 0;
-        let totalScores = [];
-        for (let i = 0; i < scores.length; i++) {
-            if (scores[i].time1 === 10) { // Strike
-                cumulativeTotal += 10 + (scores[i + 1] ? scores[i + 1].total : 0) + (scores[i + 2] ? scores[i + 2].total : 0);
-            } else if (scores[i].time1 + scores[i].time2 === 10) { // Spare
-                cumulativeTotal += 10 + (scores[i + 1] ? scores[i + 1].time1 : 0);
-            } else {
-                cumulativeTotal += scores[i].total;
-            }
-            totalScores.push(cumulativeTotal);
-        }
-        return totalScores;
-    }
-
-    function simulateMatch(team1, team2) {
-        let team1Scores = team1.players.map(player => ({ name: player, scores: generateScores() }));
-        let team2Scores = team2.players.map(player => ({ name: player, scores: generateScores() }));
-
-        let team1Total = team1Scores.reduce((sum, player) => sum + calculateTotal(player.scores).pop(), 0);
-        let team2Total = team2Scores.reduce((sum, player) => sum + calculateTotal(player.scores).pop(), 0);
-
-        let result = {
-            team1: { name: team1.nome, total: team1Total, players: team1Scores },
-            team2: { name: team2.nome, total: team2Total, players: team2Scores },
-            winner: team1Total > team2Total ? team1.nome : (team1Total < team2Total ? team2.nome : 'Draw')
+    Object.entries(TeamsTournament).forEach(([teamName, teamData]) => {
+        standingFinale[teamName] = {
+            punti: 0,
+            punteggioTotale: 0
         };
+    });
 
-        return result;
-    }
-
-    function simulateTournament(teams) {
-        let results = [];
-        for (let i = 0; i < teams.length; i++) {
-            for (let j = i + 1; j < teams.length; j++) {
-                results.push(simulateMatch(teams[i], teams[j]));
+    const findTeamByUsername = (username) => {
+        for (const teamName in memberTeams) {
+            if (memberTeams[teamName].membri.includes(username)) {
+                return memberTeams[teamName].team;
             }
         }
-        return results;
-    }
+        return null;
+    };
 
-    function calculateStandings(results) {
-        let standings = {};
-        results.forEach(result => {
-            if (!standings[result.team1.name]) standings[result.team1.name] = { points: 0, total: 0 };
-            if (!standings[result.team2.name]) standings[result.team2.name] = { points: 0, total: 0 };
+    var partite = [];
 
-            standings[result.team1.name].total += result.team1.total;
-            standings[result.team2.name].total += result.team2.total;
+    torneo.forEach((partita, index) => {
+        var teamsPartita = {};
 
-            if (result.winner === 'Draw') {
-                standings[result.team1.name].points += 1;
-                standings[result.team2.name].points += 1;
-            } else {
-                standings[result.winner].points += 2;
+        Object.entries(memberTeams).forEach(([key, team]) => {
+            var nomeTeam = team.team;
+            teamsPartita[nomeTeam] = [];
+        });
+
+        Object.entries(partita).forEach(([key, player]) => {
+            const username = player.username;
+            const team = findTeamByUsername(username);
+
+            if (team != null) {
+                teamsPartita[team].push(username);
             }
         });
 
-        return Object.entries(standings).sort((a, b) => b[1].points - a[1].points);
+        Object.keys(teamsPartita).forEach(team => {
+            if (teamsPartita[team].length === 0) {
+                delete teamsPartita[team];
+            }
+        });
+
+        partite.push(teamsPartita);
+    });
+
+    if (isUser) {
+        sidebar.innerHTML = `
+            <a href="#" class="closebtn" id="closebtn">&times;</a>
+            <a href="../UserProfile/cardAndSubscription.php" class="sidebarField">Carta e abbonamenti</a>
+            <a href="../UserProfile/historyMatchPage.php" class="sidebarField">Storico partite</a>
+            <a href="../UserProfile/historyTournaments.php" class="sidebarField">Storico tornei</a>
+            <a href="../UserProfile/userpage.php" class="sidebarField">Profilo</a>
+            <a href="../UserProfile/searchPage.php" class="sidebarField">Cerca utenti</a>    
+            <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Classifiche generali</a>
+            <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
+        `;
+    }
+
+    function calculateStandings() {
+        const standingsArray = Object.entries(standingFinale).map(([teamName, teamData]) => ({
+            teamName,
+            points: teamData.punti,
+            total: teamData.punteggioTotale,
+        }));
+    
+        standingsArray.sort((a, b) => {
+            if (b.points !== a.points) {
+                return b.points - a.points;
+            }
+            return b.total - a.total;
+        });
+    
+        const standings = {};
+        standingsArray.forEach(({ teamName, points, total }) => {
+            standings[teamName] = { points, total };
+        });
+    
+        return standings;
     }
 
     function renderStandings(standings) {
-        let standingsDiv = document.createElement('div');
+        const standingsDiv = document.createElement('div');
         standingsDiv.id = "Standings";
         standingsDiv.classList.add('mb-4');
         standingsDiv.innerHTML = `
@@ -155,11 +146,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${standings.map(team => `
+                    ${Object.entries(standings).map(([teamName, teamData]) => `
                         <tr>
-                            <td>${team[0]}</td>
-                            <td>${team[1].points}</td>
-                            <td>${team[1].total}</td>
+                            <td>${teamName}</td>
+                            <td>${teamData.points}</td>
+                            <td>${teamData.total}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -168,81 +159,144 @@ document.addEventListener('DOMContentLoaded', function() {
         mainTag.prepend(standingsDiv);
     }
 
+    function renderResults(torneo) {
+        // Funzione per trovare il team di un giocatore
+        const findTeamByUsername = (username) => {
+            for (const [teamName, members] of Object.entries(TeamsTournament)) {
+                if (members.includes(username)) {
+                    return teamName;
+                }
+            }
+            return null;
+        };
 
-    function renderResults(results) {
-        mainTag.innerHTML = "";
-        results.forEach((result, index) => {
-            let matchDiv = document.createElement('div');
-            matchDiv.id = "MainBlock"; // Imposta l'ID come "MainBlock"
-            matchDiv.classList.add('mb-4'); // Aggiunge la classe per il margine inferiore
+        // Struttura per salvare i team per ogni partita
+        const partiteTeams = torneo.map((partita) => {
+            const teamsPartita = {};
+
+            // Analizza ogni giocatore della partita
+            Object.values(partita).forEach((player) => {
+                const team = findTeamByUsername(player.username);
+                if (team) {
+                    if (!teamsPartita[team]) {
+                        teamsPartita[team] = [];
+                    }
+                    teamsPartita[team].push(player.username);
+                }
+            });
+
+            return teamsPartita;
+        });
+
+        // Generazione delle tabelle per ogni partita
+        partiteTeams.forEach((teamsPartita, index) => {
+            const teamNames = Object.keys(teamsPartita);
+            if (teamNames.length < 2) {
+                console.error(`Partita ${index + 1}: dati incompleti per determinare i team.`);
+                return;
+            }
+
+            const matchDiv = document.createElement('div');
+            matchDiv.id = "MainBlock";
+            matchDiv.classList.add('mb-4');
+
+            const team1 = teamNames[0];
+            const team2 = teamNames[1];
+
+            const matchInfo = `Match ${index + 1}: ${team1} vs ${team2}`;
+            const teamTotals = {
+                [team1]: 0,
+                [team2]: 0,
+            };
+
+            // Calcola i punteggi totali per i team
+            Object.values(torneo[index]).forEach((player) => {
+                const team = findTeamByUsername(player.username);
+                if (team && teamTotals[team] !== undefined) {
+                    const lastSession = player.sessioni[player.sessioni.length - 1];
+                    teamTotals[team] += lastSession.punteggioSessione;
+                }
+            });
+
+            let winnerInfo = "";
+            if (teamTotals[team1] > teamTotals[team2]) {
+                winnerInfo = `<strong>Vincitore: ${team1}</strong>`;
+            } else if (teamTotals[team1] < teamTotals[team2]) {
+                winnerInfo = `<strong>Vincitore: ${team2}</strong>`;
+            } else {
+                winnerInfo = `<strong>Pareggio!</strong>`;
+            }
+
             matchDiv.innerHTML = `
-                <div id="BlockBanner" class="d-flex justify-content-center align-items-center w-100">
-                    Match ${index + 1}: ${result.team1.name} vs ${result.team2.name}
-                </div>
-                <div class="container mt-3">
-                    <table class="table-bordered table-sm styled-table">
-                        <thead>
+            <div id="BlockBanner" class="d-flex justify-content-center align-items-center w-100">
+                ${matchInfo}
+            </div>
+            <div class="container mt-3">
+                <table class="table-bordered table-sm styled-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Giocatore</th>
+                            ${Array.from({ length: 10 }, (_, roundIndex) => `<th colspan="2">Frame ${roundIndex + 1}</th>`).join('')}
+                        </tr>
+                        <tr>
+                            ${Array.from({ length: 10 }, () => `<th>T. 1</th><th>T. 2</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.values(torneo[index]).map((player) => {
+                const sessions = player.sessioni;
+                return `
                             <tr>
-                                <th rowspan="2">Giocatore</th>
-                                ${Array.from({ length: 10 }, (_, roundIndex) => `<th colspan="2">Frame ${roundIndex + 1}</th>`).join('')}
+                                <td>${player.username}</td>
+                                ${sessions.map((session, index) => `
+                                    <td colspan="2" style="font-weight: bolder;">${session.punteggioSessione}</td>
+                                `).join('')}
                             </tr>
                             <tr>
-                                ${Array.from({ length: 10 }, () => `<th>T. 1</th><th>T. 2</th>`).join('')}
+                                <td></td>
+                                ${sessions.map((session, index) => `
+                                    <td>${session.lanci[0].punteggio === 10 ? 'X' : session.lanci[0].punteggio}</td>
+                                    <td>
+                                        ${session.lanci[0].punteggio === 10 ? '' : (session.lanci[0].punteggio + session.lanci[1].punteggio === 10 ? '/' : session.lanci[1].punteggio)}
+                                    </td>
+                                `).join('')}
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${result.team1.players.concat(result.team2.players).map(player => {
-                                let totalScores = calculateTotal(player.scores);
-                                return `
-                                    <tr>
-                                        <td>${player.name}</td>
-                                        ${totalScores.map((total, index) => `
-                                            <td colspan="2" style="font-weight: bolder;">${total}</td>
-                                        `).join('')}
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        ${player.scores.map((score, index) => `
-                                            <td>${score.time1 === 10 ? 'X' : score.time1}</td>
-                                            <td>
-                                                ${score.time1 === 10 ? '' : (index === 9 && score.time1 + score.time2 === 10 ? '' : (score.time1 + score.time2 === 10 ? '/' : score.time2))}
-                                                ${index === 9 ? `
-                                                    ${score.time1 === 10 ? `
-                                                        <table>
-                                                            <tr>
-                                                                <td>${score.extra1}</td>
-                                                                <td>${score.extra2}</td>
-                                                            </tr>
-                                                        </table>
-                                                    ` : (score.time1 + score.time2 === 10 ? `
-                                                        <table>
-                                                            <tr>
-                                                                <td>/</td>
-                                                                <td>${score.extra1}</td>
-                                                            </tr>
-                                                        </table>
-                                                    ` : '')}
-                                                ` : ''}
-                                            </td>
-                                        `).join('')}
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                    <div class="mt-3 mb-3">
-                        <strong>Totale ${result.team1.name}: ${result.team1.total}</strong><br>
-                        <strong>Totale ${result.team2.name}: ${result.team2.total}</strong><br>
-                        <strong>Vincitore: ${result.winner}</strong>
-                    </div>
+                        `;
+            }).join('')}
+                    </tbody>
+                </table>
+                <div class="mt-3 mb-3">
+                    <strong>Totale ${team1}: ${teamTotals[team1]}</strong><br>
+                    <strong>Totale ${team2}: ${teamTotals[team2]}</strong><br>
+                    ${winnerInfo}
                 </div>
+            </div>
             `;
+
+            standingFinale[team1].punteggioTotale += teamTotals[team1];
+            standingFinale[team2].punteggioTotale += teamTotals[team2];
+
+
+            if (teamTotals[team1] > teamTotals[team2]) {
+
+                standingFinale[team1].punti += 3;
+
+            } else if (teamTotals[team1] < teamTotals[team2]) {
+
+                standingFinale[team2].punti += 3;
+
+            } else {
+
+                standingFinale[team1].punti += 1;
+                standingFinale[team2].punti += 1;;
+            }
+
             mainTag.appendChild(matchDiv);
         });
     }
 
-    let results = simulateTournament(infoTorneo.teams);
-    renderResults(results);
-    let standings = calculateStandings(results);
+
+    renderResults(torneo);
+    let standings = calculateStandings();
     renderStandings(standings);
 });

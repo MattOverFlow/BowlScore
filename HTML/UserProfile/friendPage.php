@@ -41,15 +41,15 @@ $info = scaricaUtente($useridUtente);
             <div id="user_info">
                 <div class="row justify-content-center gy-2">
                     <div class="col-auto text-center">
-                        <p id="username"><?php echo $info["username"]?></p>
+                        <p id="username"><?php echo $info["username"] ?></p>
                         <div class="row justify-content-center" id="user_number">
                             <button type="button" class="btn col-auto pt-0 pb-0 text-center" id="followers">
                                 <p>Amici</p>
-                                <p id="nFollower"><?php echo $nFollower?></p>
+                                <p id="nFollower"><?php echo $nFollower ?></p>
                             </button>
                             <button type="button" class="btn col-auto pt-0 pb-0 text-center" id="seguiti">
                                 <p>Seguiti</p>
-                                <p id="nSeguiti"><?php echo $nSeguiti?></p>
+                                <p id="nSeguiti"><?php echo $nSeguiti ?></p>
                             </button>
                         </div>
                         <!-- Sposta il bottone qui sotto -->
@@ -63,18 +63,16 @@ $info = scaricaUtente($useridUtente);
                 </div>
             </div>
             <div class="d-flex flex-column align-items-center justify-content-center">
-                <div class="col-8" id="playerStatistics">
+                <div class="col-8" id="playerStatistics" style="display: none;">
                     <h2>Statistiche del Giocatore</h2>
                     <ul>
                         <li>Punteggio Medio (Average Score): <span id="averageScore">N/A</span></li>
                         <li>Strike Rate (Percentuale di Strike): <span id="strikeRate">N/A</span></li>
                         <li>Spare Rate (Percentuale di Spare): <span id="spareRate">N/A</span></li>
                         <li>Punteggio Massimo in una Partita (High Game): <span id="highGame">N/A</span></li>
-                        <li>Serie Massima (High Series): <span id="highSeries">N/A</span></li>
                         <li>First Ball Average: <span id="firstBallAverage">N/A</span></li>
                         <li>Clean Game: <span id="cleanGame">N/A</span></li>
                         <li>Percentuale di Frame Puliti (Clean Frame Percentage): <span id="cleanFramePercentage">N/A</span></li>
-                        <li>Differenziale di Punteggio (Score Differential): <span id="scoreDifferential">N/A</span></li>
                     </ul>
                 </div>
             </div>
@@ -124,11 +122,10 @@ $info = scaricaUtente($useridUtente);
 
 <!-- Script per il bottone di follow/unfollow -->
 <script>
-    async function checkFollow() {
-        const userID = "<?php echo $_SESSION['userid']; ?>";
-        const useridUtente = "<?php echo $useridUtente; ?>";
+    const userID = "<?php echo $_SESSION['userid']; ?>";
 
-        button = document.getElementById("followButtonNotFollow");
+    async function checkFollow() {
+        const button = document.getElementById("followButtonNotFollow");
 
         const response = await fetch('../../PHP/Utente/checkFollow.php', {
             method: 'POST',
@@ -136,44 +133,65 @@ $info = scaricaUtente($useridUtente);
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: `userId=${userID}&useridUtente=${useridUtente}`
-            });
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-        if(data === true) {
+        if (data === true) {
             button.innerHTML = "unfollow";
             button.classList.remove("btn-primary");
             button.classList.add("btn-secondary");
+            const statistics = document.getElementById("playerStatistics");
+            statistics.style.display = "block";
         } else {
             button.innerHTML = "follow";
             button.classList.remove("btn-secondary");
             button.classList.add("btn-primary");
+            const statistics = document.getElementById("playerStatistics");
+            statistics.style.display = "none";
         }
     }
 
     checkFollow();
 
-    document.getElementById("followButtonNotFollow").addEventListener("click",async function() {
+    document.addEventListener("DOMContentLoaded", async function() {
+        const resultStatistics = await fetch('../../PHP/Statistiche/downloadPersonalStatistics.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `userid=${useridUtente}`
+        });
+
+        const statistics = await resultStatistics.json();
+
+        document.getElementById("averageScore").innerText = statistics.averageScore || '0';
+        document.getElementById("strikeRate").innerText = statistics.strikeRate || '0';
+        document.getElementById("spareRate").innerText = statistics.spareRate || '0';
+        document.getElementById("highGame").innerText = statistics.highGame || '0';
+        document.getElementById("firstBallAverage").innerText = statistics.firstBallAverage || '0';
+        document.getElementById("cleanGame").innerText = statistics.cleanGame || '0';
+        document.getElementById("cleanFramePercentage").innerText = statistics.cleanFramePercentage || '0';
+    });
+
+    document.getElementById("followButtonNotFollow").addEventListener("click", async function() {
         const button = this;
         var type = button.innerHTML;
-        var userID = "<?php echo $_SESSION['userid']; ?>";
-        var useridUtente = "<?php echo $useridUtente; ?>";
 
-        if(type === "follow") {
+        if (type === "follow") {
             const response = await fetch('../../PHP/Utente/followUser.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: `userId=${userID}&useridUtente=${useridUtente}`
-                });
+            });
 
-            if(response.ok) {
-            button.innerHTML = "unfollow";
-            button.classList.remove("btn-primary");
-            button.classList.add("btn-secondary");
-            }
-            else {
+            if (response.ok) {
+                button.innerHTML = "unfollow";
+                button.classList.remove("btn-primary");
+                button.classList.add("btn-secondary");
+            } else {
                 throw new Error('Errore');
             }
         } else {
@@ -183,17 +201,17 @@ $info = scaricaUtente($useridUtente);
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: `userId=${userID}&useridUtente=${useridUtente}`
-                });
+            });
 
-            if(response.ok) {
-            button.innerHTML = "follow";
-            button.classList.remove("btn-secondary");
-            button.classList.add("btn-primary");
-            }
-            else {
+            if (response.ok) {
+                button.innerHTML = "follow";
+                button.classList.remove("btn-secondary");
+                button.classList.add("btn-primary");
+            } else {
                 throw new Error('Errore');
             }
         }
-            });
+    });
 </script>
+
 </html>

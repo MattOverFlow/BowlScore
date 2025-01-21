@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded",async function() {
     const urlParams = new URLSearchParams(window.location.search);
     const userType = urlParams.get('type');
     const sidebar = document.getElementById('mySidebar');
@@ -8,54 +8,48 @@ document.addEventListener("DOMContentLoaded", function() {
             <a href="../AdminProfile/createGame.php" class="sidebarField">Crea partita</a>
             <a href="../AdminProfile/createTournament.php" class="sidebarField">Crea torneo</a>
             <a href="../AdminProfile/createTeam.php" class="sidebarField">Crea team</a>
-            <a href="../AdminProfile/manageTournaments.php" class="sidebarField">Gestisci tornei</a>
-            <a href="../AdminProfile/manageTeams.php" class="sidebarField">Gestisci teams</a>
-            <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Statistiche generali</a>
+            <a href="../AdminProfile/manageTournaments.php" class="sidebarField">Storico tornei</a>
+            <a href="../AdminProfile/manageTeams.php" class="sidebarField">Gestione teams</a>
+            <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Classifiche generali</a>
             <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca giocatori</a>                    
             <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
         `;
     } else {
         sidebar.innerHTML += `
-            <a href="../UserProfile/cardAndSubscription.php" class="sidebarField">Carte e abbonamenti</a>
+            <a href="../UserProfile/cardAndSubscription.php" class="sidebarField">Carta e abbonamenti</a>
             <a href="../UserProfile/historyMatchPage.php" class="sidebarField">Storico partite</a>
             <a href="../UserProfile/historyTournaments.php" class="sidebarField">Storico tornei</a>
-            <a href="../UserProfile/matchPage.php" class="sidebarField">Partite</a>
             <a href="../UserProfile/userpage.php" class="sidebarField">Profilo</a>
-            <a href="../UserProfile/searchPage.php" class="sidebarField">Cerca</a>    
-            <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Statistiche generali</a>
+            <a href="../UserProfile/searchPage.php" class="sidebarField">Cerca utenti</a>    
+            <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Classifiche generali</a>
             <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
         `;
     }
 
     const main = document.querySelector('main');
     if (main) {
-        main.innerHTML = generateStatisticsHTML();
+        main.innerHTML = await generateStatisticsHTML();
     }
 });
 
-function generateStatisticsHTML() {
+async function generateStatisticsHTML() {
     return `
-        ${generateTableHTML('Classifica 10 giocatori con punteggio massimo', generateFakeData(10))}
-        ${generateTableHTML('Classifica 10 giocatori migliori del mese', generateFakeData(10))}
-        ${generateTableHTML('Classifica 10 giocatori migliori della settimana', generateFakeData(10))}
-        ${generateTableHTML('Classifica 10 giocatori con maggior numero di vittorie', generateFakeData(10))}
-        ${generateTableHTML('Classifica 10 giocatori con maggior numero di vittorie nel mese', generateFakeData(10))}
-        ${generateTableHTML('Classifica 10 giocatori con maggior numero di vittorie della settimana', generateFakeData(10))}
-        ${generateTableHTML('Lista con tutte le persone con partita perfetta', generateFakeData(10))}
-        ${generateTableHTML('Classifica 10 giocatori con miglior media punti', generateFakeData(10))}
-        ${generateTableHTML('10 squadre tornei più vittoriose', generateFakeData(10))}
-        ${generateTableHTML('10 giocatori più vittoriosi nei tornei singoli', generateFakeData(10))}
-        ${generateTableHTML('Strike Rate: 10 giocatori migliori', generateFakeData(10))}
-        ${generateTableHTML('Spare Rate: 10 giocatori migliori', generateFakeData(10))}
-        ${generateTableHTML('Pinfall Totale: 10 giocatori migliori', generateFakeData(10))}
-        ${generateTableHTML('Gutter Balls: 10 giocatori peggiori', generateFakeData(10))}
-        ${generateTableHTML('Miglioramenti del Punteggio Medio: 10 migliori giocatori', generateFakeData(10))}
-        ${generateTableHTML('Tendenze di Strike e Spare: 10 migliori giocatori', generateFakeData(10))}
+        ${generateTableHTML('Classifica 10 giocatori con maggior numero di vittorie',await mostWinStatistic("all"))}
+        ${generateTableHTML('Classifica 10 giocatori con maggior numero di vittorie nel mese', await mostWinStatistic("month"))}
+        ${generateTableHTML('Classifica 10 giocatori con maggior numero di vittorie della settimana', await mostWinStatistic("week"))}
+        ${generateTableHTML('Classifica 10 giocatori con miglior media punti', await bestAverageStatistic())}
+        ${generateTableHTML('Strike Rate: 10 giocatori migliori',await bestStrikeRateStatistic())}
+        ${generateTableHTML('Spare Rate: 10 giocatori migliori', await bestSpareRateStatistic())}
+        ${generateTableHTML('Pinfall Medio: 10 giocatori migliori',await bestPinfallStatistic())}
     `;
 }
 
 function generateTableHTML(title, data) {
-    let tableRows = data.map((row, index) => `<tr><td>${index + 1}</td>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('');
+
+    let tableRows = Object.entries(data).map(([username, value], index) => {
+        return `<tr><td>${index + 1}</td><td>${username}</td><td>${value}</td></tr>`;
+    }).join('');
+
     return `
         <div class="col-9 flex-column justify-content-center align-items-center mb-3 pb-4">
             <div class="mb-3 d-flex justify-content-center align-items-center w-100" style="font-size: 1.5em; font-weight: bold;">
@@ -63,7 +57,11 @@ function generateTableHTML(title, data) {
             </div>
             <table class="table">
                 <thead>
-                    <tr><th>Posizione</th>${data[0].map(cell => `<th>${cell}</th>`).join('')}</tr>
+                    <tr>
+                        <th>Posizione</th>
+                        <th>Username</th>
+                        <th>Valore</th>
+                    </tr>
                 </thead>
                 <tbody>
                     ${tableRows}
@@ -73,10 +71,72 @@ function generateTableHTML(title, data) {
     `;
 }
 
-function generateFakeData(rows) {
-    const data = [];
-    for (let i = 0; i < rows; i++) {
-        data.push([`Giocatore ${i + 1}`, Math.floor(Math.random() * 300)]);
-    }
+
+
+async function mostWinStatistic(period){
+    const response = await fetch('../../PHP/Statistiche/winStatistic.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `period=${period}`,
+    });
+
+    var data = await response.json();
+    console.log(data);
     return data;
 }
+
+
+async function bestAverageStatistic(){
+    const response = await fetch('../../PHP/Statistiche/bestAverageStatistic.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+    var data = await response.json();
+    console.log(data);
+    return data;
+}
+
+async function bestStrikeRateStatistic(){
+    const response = await fetch('../../PHP/Statistiche/bestStrikeRates.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+    var data = await response.json();
+    console.log(data);
+    return data;
+}
+
+async function bestSpareRateStatistic(){
+    const response = await fetch('../../PHP/Statistiche/bestSpareRates.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+    var data = await response.json();
+    console.log(data);
+    return data;
+}
+
+async function bestPinfallStatistic(){
+    const response = await fetch('../../PHP/Statistiche/bestPinfallRate.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+    var data = await response.json();
+    console.log(data);
+    return data;
+}
+
+
+
+
+

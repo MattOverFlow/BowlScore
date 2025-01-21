@@ -5,6 +5,6 @@
 
     session_unset();
     setcookie('token', '', time() - 3600, '/');
-    header('Location: ../../HTML/Access/AccessPage.php');
+    header('Location: ../../HTML/Access/Access.php');
     exit();
 ?>

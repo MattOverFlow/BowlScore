@@ -6,7 +6,7 @@ include '../../PHP/Utils/auth_request.php';
 <html lang="it">
     <head>
         <meta charset="UTF-8">
-        <title>BowlScore - Carte e abbonamenti</title>
+        <title>BowlScore - Carta e abbonamenti</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
         <link href="../../CSS/Access/AccessStyleBase.css" rel="stylesheet" type="text/css">
@@ -17,13 +17,12 @@ include '../../PHP/Utils/auth_request.php';
             <header id="profile_header">
                 <div id="mySidebar" class="sidebar justify-content-end">
                     <a href="#" class="closebtn" id="closebtn">&times;</a>
-                    <a href="cardAndSubscription.php" class="sidebarField">Carte e abbonamenti</a>
+                    <a href="cardAndSubscription.php" class="sidebarField">Carta e abbonamenti</a>
                     <a href="historyMatchPage.php" class="sidebarField">Storico partite</a>
                     <a href="historyTournaments.php" class="sidebarField">Storico tornei</a>
-                    <a href="matchPage.php" class="sidebarField">Partite</a>
                     <a href="userpage.php" class="sidebarField">Profilo</a>
-                    <a href="searchPage.php" class="sidebarField">Cerca</a>
-                    <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Statistiche generali</a>  
+                    <a href="searchPage.php" class="sidebarField">Cerca utenti</a>
+                    <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Classifiche generali</a>  
                     <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
                 </div>
                 <button class="openbtn" id="openbtn">

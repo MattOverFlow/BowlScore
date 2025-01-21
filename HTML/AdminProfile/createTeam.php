@@ -20,9 +20,9 @@
                 <a href="createGame.php" class="sidebarField">Crea partita</a>
                 <a href="createTournament.php" class="sidebarField">Crea torneo</a>
                 <a href="createTeam.php" class="sidebarField">Crea team</a>
-                <a href="manageTournaments.php" class="sidebarField">Gestisci tornei</a>
-                <a href="manageTeams.php" class="sidebarField">Gestisci teams</a>
-                <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Statistiche generali</a>
+                <a href="manageTournaments.php" class="sidebarField">Storico tornei</a>
+                <a href="manageTeams.php" class="sidebarField">Gestione teams</a>
+                <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Classifiche generali</a>
                 <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca giocatori</a>                    
                 <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>

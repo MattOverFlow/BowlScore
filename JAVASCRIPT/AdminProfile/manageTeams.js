@@ -36,8 +36,6 @@ async function cercaTeams(searchTerm) {
 
 }
 
-
-
 document.addEventListener("DOMContentLoaded", async function () {
 
     var mainTag = document.querySelector("main");

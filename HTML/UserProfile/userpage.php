@@ -24,13 +24,12 @@ $nSeguiti = numeroSeguiti($userid);
         <header id="profile_header">
             <div id="mySidebar" class="sidebar justify-content-end">
                 <a href="#" class="closebtn" id="closebtn">&times;</a>
-                <a href="cardAndSubscription.php" class="sidebarField">Carte e abbonamenti</a>
+                <a href="cardAndSubscription.php" class="sidebarField">Carta e abbonamenti</a>
                     <a href="historyMatchPage.php" class="sidebarField">Storico partite</a>
                     <a href="historyTournaments.php" class="sidebarField">Storico tornei</a>
-                    <a href="matchPage.php" class="sidebarField">Partite</a>
                     <a href="userpage.php" class="sidebarField">Profilo</a>
-                    <a href="searchPage.php" class="sidebarField">Cerca</a>
-                    <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Statistiche generali</a>                    
+                    <a href="searchPage.php" class="sidebarField">Cerca utenti</a>
+                    <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Classifiche generali</a>                    
                     <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">
@@ -73,11 +72,9 @@ $nSeguiti = numeroSeguiti($userid);
                         <li>Strike Rate (Percentuale di Strike): <span id="strikeRate">N/A</span></li>
                         <li>Spare Rate (Percentuale di Spare): <span id="spareRate">N/A</span></li>
                         <li>Punteggio Massimo in una Partita (High Game): <span id="highGame">N/A</span></li>
-                        <li>Serie Massima (High Series): <span id="highSeries">N/A</span></li>
                         <li>First Ball Average: <span id="firstBallAverage">N/A</span></li>
                         <li>Clean Game: <span id="cleanGame">N/A</span></li>
                         <li>Percentuale di Frame Puliti (Clean Frame Percentage): <span id="cleanFramePercentage">N/A</span></li>
-                        <li>Differenziale di Punteggio (Score Differential): <span id="scoreDifferential">N/A</span></li>
                     </ul>
                 </div>
             </div>
@@ -85,7 +82,6 @@ $nSeguiti = numeroSeguiti($userid);
     </div>
 </body>
 <script src="../../JAVASCRIPT\Utils\sidenav.js" type="module"></script>
-<script src="../../JAVASCRIPT/Profile/userpage.js" type="module"></script>
 <script>
     document.getElementById("followers").addEventListener("click", function() {
         window.location.href = "followerPage.php";
@@ -93,5 +89,28 @@ $nSeguiti = numeroSeguiti($userid);
     document.getElementById("seguiti").addEventListener("click", function() {
         window.location.href = "followedPage.php";
     });
+
+    const userID = "<?php echo $_SESSION['userid']; ?>";
+
+    document.addEventListener("DOMContentLoaded", async function() {
+        const resultStatistics = await fetch('../../PHP/Statistiche/downloadPersonalStatistics.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `userid=${userID}`
+        });
+
+        const statistics = await resultStatistics.json();
+
+        document.getElementById("averageScore").innerText = statistics.averageScore || '0';
+        document.getElementById("strikeRate").innerText = statistics.strikeRate || '0';
+        document.getElementById("spareRate").innerText = statistics.spareRate || '0';
+        document.getElementById("highGame").innerText = statistics.highGame || '0';
+        document.getElementById("firstBallAverage").innerText = statistics.firstBallAverage || '0';
+        document.getElementById("cleanGame").innerText = statistics.cleanGame || '0';
+        document.getElementById("cleanFramePercentage").innerText = statistics.cleanFramePercentage || '0';
+    });
+
 </script>
 </html>

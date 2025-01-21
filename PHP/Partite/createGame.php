@@ -2,6 +2,7 @@
 include_once(__DIR__ . "/../Database/Admin.php");
 include_once(__DIR__ . "/../Database/User.php");
 include_once(__DIR__ . "/../Database/Carte.php");
+include_once(__DIR__ . "/../Database/Partita.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gameName = $_POST['gameName'];
@@ -53,11 +54,11 @@ foreach ($participants as $participant) {
                 $usersData[] = ['userid' => $userid, 'partiteTotali' => $partiteTotali - 1];
             }
         }
-
-        foreach ($usersData as $userData) {
-            aggiornaPartiteTotali($userData['userid'], $userData['partiteTotali']);
-        }
     }
+}
+
+foreach ($usersData as $userData) {
+    aggiornaPartiteTotali($userData['userid']);
 }
 
 if (isset($_POST['codiceTorneoSingolo'] )) {
@@ -75,6 +76,8 @@ if (isset($_POST['codiceTorneoSquadre'])) {
 $dataOggi = new DateTime();
 $dataOggiFormattata = $dataOggi->format('Y-m-d H:i:s');
 $idPartita = creaPartita($gameName, $numParticipants, $dataOggiFormattata);
+$highestScore = 0;
+$winners = [];
 
 foreach ($participants as $index => $participant) {
     $datiUtente = datiUtenteDaUsername($participant);
@@ -85,6 +88,21 @@ foreach ($participants as $index => $participant) {
 
         $participantScores = $scoresList[$index];
         $totalScores = $totalScoresList[$index];
+
+        if ($totalScores[9] > $highestScore) {
+            $highestScore = $totalScores[9];
+            $winners = [
+                [
+                    'userid' => $datiUtente['userid'],
+                    'score' => $totalScores[9],
+                ]
+            ];
+        } elseif ($totalScores[9] === $highestScore) {
+            $winners[] = [
+                'userid' => $datiUtente['userid'],
+                'score' => $totalScores[9],
+            ];
+        }
 
         for ($i = 0; $i < 10; $i++) {
 
@@ -101,4 +119,8 @@ foreach ($participants as $index => $participant) {
             }
         }
     }
+}
+
+foreach ($winners as $winner) {
+    assegnaVincitorePartita($idPartita, $winner['userid']);
 }

@@ -177,12 +177,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             body: query,
         });
 
-        location.reload();
-
         if (response.ok) {
             showPopup('successPopup', 'Partita creata con successo!');
         } else {
             showPopup('errorPopup', 'Errore nella creazione della partita.');
         }
+
+        location.reload();
     });
+
 });

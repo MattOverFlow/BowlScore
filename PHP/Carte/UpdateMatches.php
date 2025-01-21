@@ -6,7 +6,7 @@ include_once ("../Database/Carte.php");
 
 $pacchetto = trovaPacchetto($_POST['codicePacchetto']);
 
-if (aggiornaPartiteTotali($_SESSION['userid'], $pacchetto['numero_partite'])) {
+if (aggiungiPartiteTotali($_SESSION['userid'], $pacchetto['numero_partite'])) {
     echo "Partite aggiornate con successo!";
 } else {
     echo "Errore nell'aggiornamento delle partite!";

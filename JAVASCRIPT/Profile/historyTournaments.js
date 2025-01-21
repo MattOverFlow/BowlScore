@@ -1,79 +1,166 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var tournaments = [
-        {
-            nome: "francescoCup",
-            data: "01/01/2021",
-            tipo: "Teams",
-            numElementiTeam: 3,
-            teams: ["team1", "team2", "team3", "team4"],
-        },
-        {
-            nome: "CiccioCup",
-            data: "01/01/2021",
-            tipo: "Singolo",
-            numPartecipanti: 9,
-            partecipanti: ["piero", "pirlo", "franceso", "beppe", "zampa", "mattia", "nico", "miguel", "giovanni"],
-        }
-    ];
+    const sidebar = document.getElementById('mySidebar');
+
+    sidebar.innerHTML = `
+            <a href="cardAndSubscription.php" class="sidebarField">Carta e abbonamenti</a>
+            <a href="historyMatchPage.php" class="sidebarField">Storico partite</a>
+            <a href="historyTournaments.php" class="sidebarField">Storico tornei</a>
+            <a href="userpage.php" class="sidebarField">Profilo</a>
+            <a href="searchPage.php" class="sidebarField">Cerca utenti</a>    
+            <a href="../Statistics/generalStatistic.php?type=user" class="sidebarField">Classifiche generali</a>
+            <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
+        `;
 
     var mainTag = document.querySelector("main");
 
-    function renderTournaments(filteredTournaments) {
-        mainTag.innerHTML = "";
-        filteredTournaments.forEach((tournament, index) => {
-            let mainBlockHTML = `
-                <div id="MainBlock" class="col-5 flex-column justify-content-center align-items-center mb-3 pb-4">
-                    <div id="BlockBanner" class="d-flex justify-content-center align-items-center w-100">
-                        ${tournament.nome}
-                    </div>
-                    <div class="container mt-3">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="p-3 border bg-light infoblock">
-                                    <h5>${tournament.tipo === "Singolo" ? "Numero di partecipanti" : "Numero di persone nel team"}</h5>
-                                    <p id="teamSize">${tournament.tipo === "Singolo" ? tournament.numPartecipanti : tournament.numElementiTeam}</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-3 border bg-light infoblock">
-                                    <h5>${tournament.tipo === "Singolo" ? "Username dei partecipanti" : "Nomi dei team"}</h5>
-                                    <p id="teamMembers">${tournament.tipo === "Singolo" ? tournament.partecipanti.map(member => `<div>${member}</div>`).join('') : tournament.teams.map(team => `<div>${team}</div>`).join('')}</p>
-                                </div>
+    function renderSingleTournaments(singleTournaments) {
+
+        const tournaments = Object.values(singleTournaments);
+
+        tournaments.forEach((tournament) => {
+            let singleTournamentHTML = `
+            <div id="MainBlock" class="col-5 flex-column justify-content-center align-items-center mb-3 pb-4">
+                <div id="BlockBanner" class="d-flex justify-content-center align-items-center w-100">
+                    ${tournament.torneo.NomeTorneo}
+                </div>
+                <div class="container mt-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="p-3 border bg-light infoblock">
+                                <h5>Numero di partecipanti</h5>
+                                <p id="teamSize">${tournament.torneo.NumeroPartecipanti} partecipanti</p>
+                                <h5 class="mt-3">Data di svolgimento</h5>
+                                <p id="tournamentDate">${new Date(tournament.torneo.DataCreazione).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
                             </div>
                         </div>
-                        <div class="row mt-3 justify-content-center">
-                            <div class="col-md-6 text-center">
-                                ${tournament.tipo === 'Singolo' 
-                                    ? `<button class="viewDetailsButton btn btn-primary" data-url="../AdminProfile/viewDetailTournamentSingle.php?type=user">Visualizza dettagli</button>`
-                                    : `<button class="viewDetailsButton btn btn-primary" data-url="../AdminProfile/viewDetailTournamentTeam.php?type=user">Visualizza dettagli</button>`
-                                }
+                        <div class="col-md-6">
+                            <div class="p-3 border bg-light infoblock">
+                                <h5>Username dei partecipanti</h5>
+                                <p id="teamMembers">${tournament.partecipanti.map(member => `<div>${member}</div>`).join('')}</p>
                             </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3 justify-content-center">
+                        <div class="col-md-6 text-center">
+                            <button class="viewDetailsButton btn btn-primary" data-url="../AdminProfile/viewDetailTournamentSingle.php?type=user&idTorneo=${tournament.torneo.IdTorneo}">Visualizza dettagli</button>
                         </div>
                     </div>
                 </div>
-            `;
-            mainTag.innerHTML += mainBlockHTML;
+            </div>
+        `;
+            mainTag.innerHTML += singleTournamentHTML;
         });
+    }
+    
+    function renderTeamTournaments(teamTournaments) {
+        
+        const tournaments = Object.values(teamTournaments);
 
-        // Add event listeners for view details buttons
-        document.querySelectorAll('.viewDetailsButton').forEach(function(button) {
-            button.addEventListener('click', function() {
-                var url = this.getAttribute('data-url');
-                window.location.href = url;
-            });
+        tournaments.forEach((tournament) => {
+            let teamTournamentHTML = `
+            <div id="MainBlock" class="col-5 flex-column justify-content-center align-items-center mb-3 pb-4">
+                <div id="BlockBanner" class="d-flex justify-content-center align-items-center w-100">
+                    ${tournament.torneo.NomeTorneo}
+                </div>
+                <div class="container mt-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="p-3 border bg-light infoblock">
+                                <h5>Numero di team partecipanti</h5>
+                                <p id="teamSize">${tournament.torneo.NumeroTeamPartecipanti} partecipanti</p>
+                                <h5 class="mt-3">Data di svolgimento</h5>
+                                <p id="tournamentDate">${new Date(tournament.torneo.DataCreazione).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border bg-light infoblock">
+                                <h5>Nomi dei team partecipanti</h5>
+                                <p id="teamMembers">${tournament.squadre.map(team => `<div>${team}</div>`).join('')}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3 justify-content-center">
+                        <div class="col-md-6 text-center">
+                            <button class="viewDetailsButton btn btn-primary" data-url="../AdminProfile/viewDetailTournamentTeam.php?type=user&idTorneo=${tournament.torneo.IdTorneo}">Visualizza dettagli</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+            mainTag.innerHTML += teamTournamentHTML;
         });
     }
 
-    // Render all tournaments initially
-    renderTournaments(tournaments);
-
-    // Add event listener for search input
-    var searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', function() {
-        var searchText = searchInput.value.toLowerCase();
-        var filteredTournaments = tournaments.filter(function(tournament) {
-            return tournament.nome.toLowerCase().includes(searchText);
-        });
-        renderTournaments(filteredTournaments);
+    // Aggiunta event delegation per i pulsanti
+    mainTag.addEventListener('click', function (event) {
+        if (event.target.classList.contains('viewDetailsButton')) {
+            const url = event.target.getAttribute('data-url');
+            if (url) {
+                window.location.href = url;
+            }
+        }
     });
+
+    const searchButton = document.getElementById("searchButton");
+
+    searchButton.addEventListener("click",async function() {
+
+        const searchInput = document.getElementById('searchInput').value.trim();
+        const toggleFiltersCheckbox = document.getElementById('toggleFilters');
+
+        let filters = { searchInput };
+
+        if (toggleFiltersCheckbox.checked) {
+            const tournamentType = document.getElementById('tournamentType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            filters = {
+                ...filters,
+                tournamentType,
+                startDate,
+                endDate,
+            };
+
+            if (tournamentType === 'squadre') {
+                filters.numTeams = document.getElementById('numTeams').value;
+                filters.teamSize = document.getElementById('teamSize').value;
+                filters.teamName = document.getElementById('teamName').value.trim();
+            }
+
+        } else {
+            filters = { searchInput };
+        }
+
+        const query = new URLSearchParams({
+            searchInput: filters.searchInput && filters.searchInput !== "" ? filters.searchInput : null,
+            tournamentType: filters.tournamentType && filters.tournamentType !== "" ? filters.tournamentType : null,
+            startDate: filters.startDate && filters.startDate !== "" ? filters.startDate : null,
+            endDate: filters.endDate && filters.endDate !== "" ? filters.endDate : null,
+            numTeams: filters.numTeams && filters.numTeams !== "" ? filters.numTeams : null,
+            teamSize: filters.teamSize && filters.teamSize !== "" ? filters.teamSize : null,
+            teamName: filters.teamName && filters.teamName !== "" ? filters.teamName : null,
+            username: "###"
+        }).toString();
+
+
+        const response = await fetch('../../PHP/Torneo/RicercaStoricoTornei.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: query,
+        });
+
+        const data = await response.json();
+
+        console.log(data);
+
+        mainTag.innerHTML = "";
+
+        renderSingleTournaments(data.torneiSingoli);
+        renderTeamTournaments(data.torneiSquadre);
+
+    });
+
 });
