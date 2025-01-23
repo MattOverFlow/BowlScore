@@ -10,10 +10,18 @@ include_once(__DIR__ . "/../Database/Partita.php");
 
 function downloadWinStatistic($dataInizio, $dataFine)
 {
-
     $db = getDb();
 
-    $query = "SELECT IdPartita FROM partita WHERE Data BETWEEN ? AND ?";
+    $query = "
+        SELECT u.username, COUNT(*) AS vittorie
+        FROM vittoria v
+        JOIN partita p ON v.CodicePartita = p.IdPartita
+        JOIN utente u ON v.CodiceUtente = u.UserID
+        WHERE p.Data BETWEEN ? AND ?
+        GROUP BY u.username
+        ORDER BY vittorie DESC
+        LIMIT 10
+    ";
 
     $stmt = $db->prepare($query);
     $stmt->bind_param("ss", $dataInizio, $dataFine);
@@ -22,38 +30,10 @@ function downloadWinStatistic($dataInizio, $dataFine)
 
     $result = $stmt->get_result();
 
-    $vincitori = [];
-
-    foreach ($result as $row) {
-        $idPartita = $row['IdPartita'];
-
-        $queryPartite = "SELECT CodiceUtente FROM vittoria WHERE CodicePartita = ?";
-        $stmtPartite = $db->prepare($queryPartite);
-        $stmtPartite->bind_param("s", $idPartita);
-        $stmtPartite->execute();
-        $resultPartite = $stmtPartite->get_result();
-
-        while ($rowPartite = $resultPartite->fetch_assoc()) {
-            $codiceUtente = $rowPartite['CodiceUtente'];
-
-            $datiUtente = scaricaUtente($codiceUtente);
-            if ($datiUtente === null) {
-                continue;
-            }
-
-            $username = $datiUtente['username'];
-
-            if (isset($vincitori[$username])) {
-                $vincitori[$username]++;
-            } else {
-                $vincitori[$username] = 1;
-            }
-        }
+    $vincitoriTop10 = [];
+    while ($row = $result->fetch_assoc()) {
+        $vincitoriTop10[$row['username']] = (int)$row['vittorie'];
     }
-
-    arsort($vincitori);
-
-    $vincitoriTop10 = array_slice($vincitori, 0, 10, true);
 
     return $vincitoriTop10;
 }
@@ -63,60 +43,36 @@ function downloadBestAverageStatistic()
 {
 
     global $db;
-    $query = "SELECT UserID FROM utente WHERE 1";
+    $maxPunteggioPossibile = 10;
+
+    $query = "
+        SELECT 
+            u.username,
+            ROUND(AVG(l.Punteggio) / ? * 100, 2) AS percentuale
+        FROM 
+            utente u
+        LEFT JOIN 
+            lancio l ON u.UserID = l.CodiceUtente
+        GROUP BY 
+            u.UserID
+        HAVING 
+            COUNT(l.Punteggio) > 0
+        ORDER BY 
+            percentuale DESC
+        LIMIT 10
+    ";
+
     $stmt = $db->prepare($query);
+    $stmt->bind_param("d", $maxPunteggioPossibile);
+
     $stmt->execute();
+
     $result = $stmt->get_result();
 
-    $utenti = [];
-    $maxPunteggioPossibile = 10; // Cambia questo valore in base al massimo punteggio possibile per un lancio
-
-    foreach ($result as $row) {
-        $codiceUtente = $row['UserID'];
-
-        // Query per ottenere i punteggi dei lanci dell'utente
-        $queryLanci = "SELECT Punteggio FROM lancio WHERE CodiceUtente = ?";
-        $stmtLanci = $db->prepare($queryLanci);
-        $stmtLanci->bind_param("s", $codiceUtente);
-        $stmtLanci->execute();
-        $resultLanci = $stmtLanci->get_result();
-
-        $punteggioTotale = 0;
-        $numeroLanci = 0;
-
-        // Calcola il punteggio totale e il numero di lanci
-        while ($rowLanci = $resultLanci->fetch_assoc()) {
-            $punteggioTotale += $rowLanci['Punteggio'];
-            $numeroLanci++;
-        }
-
-        // Calcola la media
-        if ($numeroLanci > 0) {
-            $mediaPunteggio = $punteggioTotale / $numeroLanci;
-        } else {
-            $mediaPunteggio = 0;
-        }
-
-        // Calcola la percentuale rispetto al massimo punteggio possibile
-        $percentuale = ($mediaPunteggio / $maxPunteggioPossibile) * 100;
-
-        // Scarica lo username dell'utente
-        $datiUtente = scaricaUtente($codiceUtente);
-        if ($datiUtente === null) {
-            continue; // Salta se l'utente non esiste
-        }
-
-        $username = $datiUtente['username'];
-
-        // Salva i dati dell'utente
-        $utenti[$username] = number_format($percentuale, 2, '.', '') . '%';
+    $utentiTop10 = [];
+    while ($row = $result->fetch_assoc()) {
+        $utentiTop10[$row['username']] = $row['percentuale'] . '%';
     }
-
-    // Ordina l'array in modo decrescente per valore
-    arsort($utenti);
-
-    // Prendi i primi 10 risultati
-    $utentiTop10 = array_slice($utenti, 0, 10, true);
 
     return $utentiTop10;
 
@@ -126,48 +82,35 @@ function downloadBestAverageStatistic()
 function downloadBestStrikeRateStatistic() {
     global $db;
 
-    $query = "SELECT UserID FROM utente WHERE 1";
+    $query = "
+        SELECT 
+            u.username,
+            ROUND(
+                (SUM(CASE WHEN LOWER(l.TipoLancio) = 'strike' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 
+                2
+            ) AS percentualeStrike
+        FROM 
+            utente u
+        LEFT JOIN 
+            lancio l ON u.UserID = l.CodiceUtente
+        GROUP BY 
+            u.UserID
+        HAVING 
+            COUNT(l.TipoLancio) > 0
+        ORDER BY 
+            percentualeStrike DESC
+        LIMIT 10
+    ";
+
     $stmt = $db->prepare($query);
     $stmt->execute();
+
     $result = $stmt->get_result();
 
-    $utenti = [];
-
-    foreach ($result as $row) {
-        $codiceUtente = $row['UserID'];
-
-        $queryStrike = "SELECT COUNT(*) AS NumStrike FROM lancio WHERE CodiceUtente = ? AND LOWER(TipoLancio) = 'strike'";
-        $stmtStrike = $db->prepare($queryStrike);
-        $stmtStrike->bind_param("s", $codiceUtente);
-        $stmtStrike->execute();
-        $resultStrike = $stmtStrike->get_result();
-        $numStrike = $resultStrike->fetch_assoc()['NumStrike'] ?? 0;
-
-        $queryTotali = "SELECT COUNT(*) AS NumTotali FROM lancio WHERE CodiceUtente = ?";
-        $stmtTotali = $db->prepare($queryTotali);
-        $stmtTotali->bind_param("s", $codiceUtente);
-        $stmtTotali->execute();
-        $resultTotali = $stmtTotali->get_result();
-        $numTotali = $resultTotali->fetch_assoc()['NumTotali'] ?? 0;
-
-        $percentualeStrike = ($numTotali > 0) ? ($numStrike / $numTotali) * 100 : 0;
-
-        $datiUtente = scaricaUtente($codiceUtente);
-        if ($datiUtente === null) {
-            continue;
-        }
-
-        $username = $datiUtente['username'];
-
-        // Formatta la percentuale con due cifre decimali e aggiungi il simbolo %
-        $utenti[$username] = number_format($percentualeStrike, 2, '.', '') . '%';
+    $utentiTop10 = [];
+    while ($row = $result->fetch_assoc()) {
+        $utentiTop10[$row['username']] = $row['percentualeStrike'] . '%';
     }
-
-    // Ordina l'array in modo decrescente per valore
-    arsort($utenti);
-
-    // Prendi i primi 10 risultati
-    $utentiTop10 = array_slice($utenti, 0, 10, true);
 
     return $utentiTop10;
 }
@@ -175,47 +118,35 @@ function downloadBestStrikeRateStatistic() {
 function downloadBestSpareRateStatistic() {
     global $db;
 
-    $query = "SELECT UserID FROM utente WHERE 1";
+    $query = "
+        SELECT 
+            u.username,
+            ROUND(
+                (SUM(CASE WHEN l.TipoLancio = 'spare' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 
+                2
+            ) AS percentualeSpare
+        FROM 
+            utente u
+        LEFT JOIN 
+            lancio l ON u.UserID = l.CodiceUtente
+        GROUP BY 
+            u.UserID
+        HAVING 
+            COUNT(l.TipoLancio) > 0
+        ORDER BY 
+            percentualeSpare DESC
+        LIMIT 10
+    ";
+
     $stmt = $db->prepare($query);
     $stmt->execute();
+
     $result = $stmt->get_result();
 
-    $utenti = [];
-
-    foreach ($result as $row) {
-        $codiceUtente = $row['UserID'];
-    
-        $querySpare = "SELECT COUNT(*) AS NumSpare FROM lancio WHERE CodiceUtente = ? AND TipoLancio = 'spare'";
-        $stmtSpare = $db->prepare($querySpare);
-        $stmtSpare->bind_param("s", $codiceUtente);
-        $stmtSpare->execute();
-        $resultSpare = $stmtSpare->get_result();
-        $numSpare = $resultSpare->fetch_assoc()['NumSpare'] ?? 0;
-    
-        $queryTotali = "SELECT COUNT(*) AS NumTotali FROM lancio WHERE CodiceUtente = ?";
-        $stmtTotali = $db->prepare($queryTotali);
-        $stmtTotali->bind_param("s", $codiceUtente);
-        $stmtTotali->execute();
-        $resultTotali = $stmtTotali->get_result();
-        $numTotali = $resultTotali->fetch_assoc()['NumTotali'] ?? 0;
-    
-        $percentualeSpare = ($numTotali > 0) ? ($numSpare / $numTotali) * 100 : 0;
-    
-        $datiUtente = scaricaUtente($codiceUtente);
-        if ($datiUtente === null) {
-            continue; 
-        }
-    
-        $username = $datiUtente['username'];
-    
-        $utenti[$username] = number_format($percentualeSpare, 2, '.', ''). '%';
+    $utentiTop10 = [];
+    while ($row = $result->fetch_assoc()) {
+        $utentiTop10[$row['username']] = $row['percentualeSpare'] . '%';
     }
-    
-    // Ordina l'array in modo decrescente per valore (media pinfall)
-    arsort($utenti);
-
-    // Prendi i primi 10 risultati
-    $utentiTop10 = array_slice($utenti, 0, 10, true);
 
     return $utentiTop10;
 }
@@ -223,43 +154,32 @@ function downloadBestSpareRateStatistic() {
 function downloadBestPinfallRates(){
     global $db;
 
-    $query = "SELECT UserID FROM utente WHERE 1";
+    $query = "
+        SELECT 
+            u.username,
+            ROUND(SUM(l.Punteggio) / COUNT(*), 2) AS mediaPinfall
+        FROM 
+            utente u
+        LEFT JOIN 
+            lancio l ON u.UserID = l.CodiceUtente
+        GROUP BY 
+            u.UserID
+        HAVING 
+            COUNT(l.Punteggio) > 0
+        ORDER BY 
+            mediaPinfall DESC
+        LIMIT 10
+    ";
+
     $stmt = $db->prepare($query);
     $stmt->execute();
+
     $result = $stmt->get_result();
 
-    $utenti = [];
-
-    foreach ($result as $row) {
-        $codiceUtente = $row['UserID'];
-    
-        $queryPinfall = "SELECT SUM(Punteggio) AS TotalPinfall, COUNT(*) AS NumTotali FROM lancio WHERE CodiceUtente = ?";
-        $stmtPinfall = $db->prepare($queryPinfall);
-        $stmtPinfall->bind_param("s", $codiceUtente);
-        $stmtPinfall->execute();
-        $resultPinfall = $stmtPinfall->get_result();
-        $rowPinfall = $resultPinfall->fetch_assoc();
-
-        $totalPinfall = $rowPinfall['TotalPinfall'] ?? 0;
-        $numTotali = $rowPinfall['NumTotali'] ?? 0;
-
-        $mediaPinfall = ($numTotali > 0) ? ($totalPinfall / $numTotali) : 0;
-
-        $datiUtente = scaricaUtente($codiceUtente);
-        if ($datiUtente === null) {
-            continue; 
-        }
-
-        $username = $datiUtente['username'];
-
-        $utenti[$username] = number_format($mediaPinfall, 2, '.', '');
+    $utentiTop10 = [];
+    while ($row = $result->fetch_assoc()) {
+        $utentiTop10[$row['username']] = $row['mediaPinfall'];
     }
-    
-    // Ordina l'array in modo decrescente per valore (media pinfall)
-    arsort($utenti);
-
-    // Prendi i primi 10 risultati
-    $utentiTop10 = array_slice($utenti, 0, 10, true);
 
     return $utentiTop10;
 }

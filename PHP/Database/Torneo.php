@@ -263,20 +263,6 @@ function ricercaStoricoTorneiSquadreConPartecipazione($searchInput, $startDate, 
     return $torneiFiltrati;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function scaricaTorneoSingolo($idTorneo)
 {
 
