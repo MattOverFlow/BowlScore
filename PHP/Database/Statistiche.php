@@ -43,27 +43,33 @@ function downloadBestAverageStatistic()
 {
 
     global $db;
-    $maxPunteggioPossibile = 10;
 
     $query = "
+    SELECT 
+        u.username,
+        ROUND(AVG(partita_media.media_partita), 2) AS punteggio_medio
+    FROM 
+        utente u
+    LEFT JOIN (
         SELECT 
-            u.username,
-            ROUND(AVG(l.Punteggio) / ? * 100, 2) AS percentuale
+            l.CodiceUtente,
+            l.CodicePartita,
+            AVG(l.Punteggio) AS media_partita
         FROM 
-            utente u
-        LEFT JOIN 
-            lancio l ON u.UserID = l.CodiceUtente
+            lancio l
         GROUP BY 
-            u.UserID
-        HAVING 
-            COUNT(l.Punteggio) > 0
-        ORDER BY 
-            percentuale DESC
-        LIMIT 10
+            l.CodiceUtente, l.CodicePartita
+    ) AS partita_media ON u.UserID = partita_media.CodiceUtente
+    GROUP BY 
+        u.UserID
+    HAVING 
+        COUNT(partita_media.media_partita) > 0
+    ORDER BY 
+        punteggio_medio DESC
+    LIMIT 10
     ";
 
     $stmt = $db->prepare($query);
-    $stmt->bind_param("d", $maxPunteggioPossibile);
 
     $stmt->execute();
 
@@ -71,7 +77,7 @@ function downloadBestAverageStatistic()
 
     $utentiTop10 = [];
     while ($row = $result->fetch_assoc()) {
-        $utentiTop10[$row['username']] = $row['percentuale'] . '%';
+        $utentiTop10[$row['username']] = $row['punteggio_medio'];
     }
 
     return $utentiTop10;

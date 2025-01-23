@@ -1,3 +1,7 @@
+<?php
+include '../../PHP/Utils/auth_request.php';
+?>
+
 <!DOCTYPE html>
 <html lang="it">
 

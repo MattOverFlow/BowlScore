@@ -73,6 +73,7 @@ function scaricaInfoUser($userid){
             $_SESSION['dataNascita'] = $dataNascita;
             $_SESSION['genere'] = $genere;
             $_SESSION['email'] = $email;
+            $_SESSION['tipo'] = $tabella;
             break;
         }
     }

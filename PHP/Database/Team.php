@@ -116,12 +116,23 @@ function scaricaTeamsDiUnTorneo($idTorneo){
             $user = scaricaUtente($userid);
             $teamName = $team['NomeTeam'];
             
-            // Verifica se l'utente è già presente nel team
-            if (!in_array($user['username'], $teams[$teamName])) {
-                $teams[$teamName][] = $user['username']; // Aggiungi solo se non è già presente
+            // Inizializza il team se non esiste
+            if (!isset($teams[$teamName])) {
+                $teams[$teamName] = [];
             }
+            
+            // Aggiungi l'utente al team solo se non è già presente
+            if (!in_array($user['username'], $teams[$teamName])) {
+                $teams[$teamName][] = $user['username'];
+            }
+        } else {
+            echo "Nessun team trovato per l'utente: $userid nella data: $dataTorneo\n";
         }
     }
+
+    $teams = array_filter($teams, function($members) {
+        return !empty($members);
+    });
     
     return $teams;
 }
