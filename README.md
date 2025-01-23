@@ -1,16 +1,28 @@
-Nella cartella BowlScore è possibile trovare tutto il sorgente dell'applicativo, mentre per eseguirlo bisogna predisporre un ambiente web utilizzando XAMPP.\\
-All'interno della cartella inviata si trova un file "create_database.sql" che permette di creare il database già popolato con qualche dato di prova.\\
-Le credenziali per accedere al database si trovano nel file "bootstrap.php" nella cartella "PHP/Utils/". Le credenziali possono essere modificate e sono queste:\\
-\\
-\\$host = "localhost";
-\\$user = "root";
-\\$password = "";
-\\$dbName = "bowling";
-\\
-Per quanto riguarda l'accesso all'applicativo si puo partire da "localhost/index.html". Come utente di prova si possono usare queste credenziali:\\
-Email: mariorossi@gmail.com\\
-Password: 11111111\\
- \\
-Invece per quanto riguarda l'amministratore è possibile usare queste credenziali:\\
-Email: admin@gmail.com
-Password: 11111111\\
+# BowlScore
+
+L'applicativo BowlScore è un sistema per la gestione e il calcolo dei punteggi del bowling.
+
+## Istruzioni per l'esecuzione
+
+1. Predisporre un ambiente web utilizzando **XAMPP**.
+2. All'interno della cartella inviata si trova il file `create_database.sql`, che permette di creare il database già popolato con qualche dato di prova.
+3. Le credenziali per accedere al database si trovano nel file `bootstrap.php`, situato nella cartella `PHP/Utils/`. Le credenziali possono essere modificate e sono le seguenti:
+
+   ```php
+   $host = "localhost";
+   $user = "root";
+   $password = "";
+   $dbName = "bowling";
+   ```
+
+4. Per accedere all'applicativo, partire da `localhost/index.html`.
+
+## Credenziali di accesso
+
+- **Utente di prova**:
+  - Email: `mariorossi@gmail.com`
+  - Password: `11111111`
+
+- **Amministratore**:
+  - Email: `admin@gmail.com`
+  - Password: `11111111`
