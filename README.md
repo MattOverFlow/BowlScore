@@ -6,3 +6,11 @@ Le credenziali per accedere al database si trovano nel file "bootstrap.php" nell
 \\$user = "root";
 \\$password = "";
 \\$dbName = "bowling";
+\\
+Per quanto riguarda l'accesso all'applicativo si puo partire da "localhost/index.html". Come utente di prova si possono usare queste credenziali:\\
+Email: mariorossi@gmail.com\\
+Password: 11111111\\
+ \\
+Invece per quanto riguarda l'amministratore è possibile usare queste credenziali:\\
+Email: admin@gmail.com
+Password: 11111111\\
