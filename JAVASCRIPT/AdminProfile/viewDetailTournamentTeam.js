@@ -21,20 +21,20 @@ async function downloadTeamsTorneo(idTorneo) {
         body: `idTorneo=${idTorneo}`,
     });
 
-    const data = await response.text();
+    const data = await response.json();
     console.log(data);
     return data;
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-    var mainTag = document.querySelector("main");
+    const mainTag = document.querySelector("main");
 
     function getUrlParams() {
         const params = {};
         const queryString = window.location.search.substring(1);
         const regex = /([^&=]+)=([^&]*)/g;
         let m;
-        while (m = regex.exec(queryString)) {
+        while ((m = regex.exec(queryString))) {
             params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
         }
         return params;
@@ -44,57 +44,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     const isUser = urlParams.type === 'user';
     const sidebar = document.getElementById('mySidebar');
     const idTorneo = urlParams.idTorneo;
+
     const datiTorneo = await downloadTorneo(idTorneo);
-    var torneo = datiTorneo.torneo;
-    var memberTeams = datiTorneo.teams;
+    const torneo = datiTorneo.torneo;
 
-    var TeamsTournament = await downloadTeamsTorneo(idTorneo);
+    const TeamsTournament = await downloadTeamsTorneo(idTorneo);
 
-    var standingFinale = {};
-
-    Object.entries(TeamsTournament).forEach(([teamName, teamData]) => {
-        standingFinale[teamName] = {
-            punti: 0,
-            punteggioTotale: 0
-        };
-    });
-
-    const findTeamByUsername = (username) => {
-        for (const teamName in memberTeams) {
-            if (memberTeams[teamName].membri.includes(username)) {
-                return memberTeams[teamName].team;
-            }
-        }
-        return null;
-    };
-
-    var partite = [];
-
-    torneo.forEach((partita, index) => {
-        var teamsPartita = {};
-
-        Object.entries(memberTeams).forEach(([key, team]) => {
-            var nomeTeam = team.team;
-            teamsPartita[nomeTeam] = [];
-        });
-
-        Object.entries(partita).forEach(([key, player]) => {
-            const username = player.username;
-            const team = findTeamByUsername(username);
-
-            if (team != null) {
-                teamsPartita[team].push(username);
-            }
-        });
-
-        Object.keys(teamsPartita).forEach(team => {
-            if (teamsPartita[team].length === 0) {
-                delete teamsPartita[team];
-            }
-        });
-
-        partite.push(teamsPartita);
-    });
+    const standingFinale = {};
 
     if (isUser) {
         sidebar.innerHTML = `
@@ -109,25 +65,42 @@ document.addEventListener('DOMContentLoaded', async function () {
         `;
     }
 
+    Object.keys(TeamsTournament).forEach((teamName) => {
+        standingFinale[teamName] = {
+            punti: 0,
+            punteggioTotale: 0,
+        };
+    });
+
+    const findTeamByUsername = (username) => {
+        for (const [teamName, members] of Object.entries(TeamsTournament)) {
+            if (members.includes(username)) {
+                return teamName;
+            }
+        }
+        console.warn(`Giocatore ${username} non trovato in nessun team.`);
+        return null;
+    };
+
     function calculateStandings() {
         const standingsArray = Object.entries(standingFinale).map(([teamName, teamData]) => ({
             teamName,
             points: teamData.punti,
             total: teamData.punteggioTotale,
         }));
-    
+
         standingsArray.sort((a, b) => {
             if (b.points !== a.points) {
                 return b.points - a.points;
             }
             return b.total - a.total;
         });
-    
+
         const standings = {};
         standingsArray.forEach(({ teamName, points, total }) => {
             standings[teamName] = { points, total };
         });
-    
+
         return standings;
     }
 
@@ -295,8 +268,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-
     renderResults(torneo);
-    let standings = calculateStandings();
+    const standings = calculateStandings();
     renderStandings(standings);
 });

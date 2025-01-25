@@ -44,7 +44,7 @@ $info = scaricaUtente($useridUtente);
                         <p id="username"><?php echo $info["username"] ?></p>
                         <div class="row justify-content-center" id="user_number">
                             <button type="button" class="btn col-auto pt-0 pb-0 text-center" id="followers">
-                                <p>Amici</p>
+                                <p>Followers</p>
                                 <p id="nFollower"><?php echo $nFollower ?></p>
                             </button>
                             <button type="button" class="btn col-auto pt-0 pb-0 text-center" id="seguiti">
