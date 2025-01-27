@@ -172,6 +172,26 @@ $info = scaricaUtente($useridUtente);
         document.getElementById("firstBallAverage").innerText = statistics.firstBallAverage || '0';
         document.getElementById("cleanGame").innerText = statistics.cleanGame || '0';
         document.getElementById("cleanFramePercentage").innerText = statistics.cleanFramePercentage || '0';
+
+        function getUrlParams() {
+        const params = {};
+        const queryString = window.location.search.substring(1);
+        const regex = /([^&=]+)=([^&]*)/g;
+        let m;
+        while (m = regex.exec(queryString)) {
+            params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+        }
+        return params;
+        }
+        
+        // Ottieni i parametri dell'URL
+        const urlParams = getUrlParams();
+        const isAdmin = urlParams.type === 'admin';
+
+        if (isAdmin) {
+            const statistics = document.getElementById("playerStatistics");
+            statistics.style.display = "block";
+        }
     });
 
     document.getElementById("followButtonNotFollow").addEventListener("click", async function() {

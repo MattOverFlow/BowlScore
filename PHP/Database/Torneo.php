@@ -83,7 +83,6 @@ function ricercaStoricoTorneiSingolo($searchInput, $startDate, $endDate, $userna
 
 function ricercaStoricoTorneiSquadre($searchInput, $startDate, $endDate, $numTeams, $teamSize, $teamName)
 {
-
     $db = getDb();
 
     $query = "
@@ -155,14 +154,114 @@ function ricercaStoricoTorneiSquadre($searchInput, $startDate, $endDate, $numTea
     }
 
     if ($teamName != null) {
-        foreach ($torneiFiltrati as $torneoId => $torneoData) {
+        $torneiFiltrati = array_filter($torneiFiltrati, function ($torneoData) use ($teamName) {
+            // Verifica se almeno una squadra corrisponde al nome cercato
+            foreach ($torneoData['squadre'] as $team) {
+                if (stripos($team, $teamName) !== false) {
+                    return true; // Mantieni il torneo
+                }
+            }
+            return false; // Escludi il torneo
+        });
+    }
 
+    return $torneiFiltrati;
+}
+
+
+
+function ricercaStoricoTorneiSquadreConPartecipazione($searchInput, $startDate, $endDate, $numTeams, $teamSize, $teamName, $username)
+{
+    // Recupera l'id dell'utente tramite la funzione datiUtenteDaUsername
+    $utente = datiUtenteDaUsername($username);
+    if (!$utente || !$utente['userid']) {
+        return []; // Se l'utente non esiste, restituisci un array vuoto
+    }
+    $utenteId = $utente['userid'];
+
+    $db = getDb();
+
+    $query = "
+        SELECT DISTINCT ts.IdTorneo, ts.NomeTorneo, ts.DataCreazione, ts.NumeroTeamPartecipanti, ts.DimensioneTeam, t.Nome AS TeamName
+        FROM torneo_squadre ts
+        LEFT JOIN partecipazione p ON ts.IdTorneo = p.CodiceTorneoSquadre
+        LEFT JOIN iscritto i ON p.CodiceTorneoSquadre = i.CodiceTorneoSquadre
+        LEFT JOIN team t ON i.NomeTeam = t.Nome
+        WHERE 1=1
+    ";
+
+    $params = [];
+
+    if ($searchInput != null) {
+        $query .= " AND ts.NomeTorneo LIKE ?";
+        $params[] = "%$searchInput%";
+    }
+
+    if ($startDate != null) {
+        $query .= " AND ts.DataCreazione >= ?";
+        $params[] = $startDate;
+    }
+
+    if ($endDate != null) {
+        $query .= " AND ts.DataCreazione <= ?";
+        $params[] = $endDate;
+    }
+
+    if ($numTeams != null) {
+        $query .= " AND ts.NumeroTeamPartecipanti = ?";
+        $params[] = $numTeams;
+    }
+
+    if ($teamSize != null) {
+        $query .= " AND ts.DimensioneTeam = ?";
+        $params[] = $teamSize;
+    }
+
+    // Aggiungi il filtro per CodiceUtente
+    $query .= " AND p.CodiceUtente = ?";
+    $params[] = $utenteId;
+
+    $stmt = $db->prepare($query);
+
+    if (count($params) > 0) {
+        $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+    }
+
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    $torneiFiltrati = [];
+    while ($row = $result->fetch_assoc()) {
+        $torneoId = $row['IdTorneo'];
+
+        if (!isset($torneiFiltrati[$torneoId])) {
+            $torneiFiltrati[$torneoId] = [
+                'torneo' => [
+                    'IdTorneo' => $row['IdTorneo'],
+                    'NomeTorneo' => $row['NomeTorneo'],
+                    'DataCreazione' => $row['DataCreazione'],
+                    'NumeroTeamPartecipanti' => $row['NumeroTeamPartecipanti'],
+                    'DimensioneTeam' => $row['DimensioneTeam'],
+                ],
+                'squadre' => []
+            ];
+        }
+
+        if ($row['TeamName']) {
+            $torneiFiltrati[$torneoId]['squadre'][] = $row['TeamName'];
+        }
+    }
+
+    // Filtra i tornei che non contengono squadre con il nome specificato
+    if ($teamName != null) {
+        foreach ($torneiFiltrati as $torneoId => &$torneoData) {
             $filteredSquad = array_filter($torneoData['squadre'], function ($team) use ($teamName) {
                 return stripos($team, $teamName) !== false; // Controllo case-insensitive
             });
 
-            if (count($filteredSquad) <= 0) {
-                unset($torneiFiltrati[$torneoId]);
+            if (empty($filteredSquad)) {
+                unset($torneiFiltrati[$torneoId]); // Rimuovi il torneo se nessuna squadra corrisponde
             }
         }
     }
@@ -170,98 +269,7 @@ function ricercaStoricoTorneiSquadre($searchInput, $startDate, $endDate, $numTea
     return $torneiFiltrati;
 }
 
-function ricercaStoricoTorneiSquadreConPartecipazione($searchInput, $startDate, $endDate, $numTeams, $teamSize, $teamName, $username)
-{
-    // Recupera l'id dell'utente tramite la funzione datiUtenteDaUsername
-    $utente = datiUtenteDaUsername($username);
-    if (!$utente || !$utente['userid']) {
-        // Se l'utente non esiste o non ha un id, restituiamo un array vuoto
-        return [];
-    }
-    $utenteId = $utente['userid']; // Otteniamo l'id dell'utente
 
-    $db = getDb();
-
-    $query = "
-        SELECT DISTINCT ts.IdTorneo, ts.NomeTorneo, ts.DataCreazione, ts.NumeroTeamPartecipanti, ts.DimensioneTeam, t.Nome AS TeamName
-        FROM torneo_squadre ts
-        LEFT JOIN partecipazione p ON ts.IdTorneo = p.CodiceTorneoSquadre
-        LEFT JOIN iscritto i ON p.CodiceTorneoSquadre = i.CodiceTorneoSquadre
-        LEFT JOIN team t ON i.NomeTeam = t.Nome
-        WHERE 1=1
-    ";
-
-    $params = [];
-
-    if ($searchInput != null) {
-        $query .= " AND ts.NomeTorneo LIKE ?";
-        $params[] = "%$searchInput%";
-    }
-
-    if ($startDate != null) {
-        $query .= " AND ts.DataCreazione >= ?";
-        $params[] = $startDate;
-    }
-
-    if ($endDate != null) {
-        $query .= " AND ts.DataCreazione <= ?";
-        $params[] = $endDate;
-    }
-
-    if ($numTeams != null) {
-        $query .= " AND ts.NumeroTeamPartecipanti = ?";
-        $params[] = $numTeams;
-    }
-
-    if ($teamSize != null) {
-        $query .= " AND ts.DimensioneTeam = ?";
-        $params[] = $teamSize;
-    }
-
-    // Aggiungi il filtro per il teamName se è presente
-    if ($teamName != null) {
-        $query .= " AND t.Nome LIKE ?";
-        $params[] = "%$teamName%";
-    }
-
-    // Aggiungi il filtro per CodiceUtente nella partecipazione
-    $query .= " AND p.CodiceUtente = ?";
-    $params[] = $utenteId; // Usa l'id dell'utente recuperato
-
-    $stmt = $db->prepare($query);
-
-    if (count($params) > 0) {
-        $stmt->bind_param(str_repeat('s', count($params)), ...$params);
-    }
-
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-
-    $torneiFiltrati = [];
-    while ($row = $result->fetch_assoc()) {
-        $torneoId = $row['IdTorneo'];
-
-        if (!isset($torneiFiltrati[$torneoId])) {
-            $torneiFiltrati[$torneoId] = [
-                'torneo' => [
-                    'IdTorneo' => $row['IdTorneo'],
-                    'NomeTorneo' => $row['NomeTorneo'],
-                    'DataCreazione' => $row['DataCreazione'],
-                    'NumeroTeamPartecipanti' => $row['NumeroTeamPartecipanti'],
-                    'DimensioneTeam' => $row['DimensioneTeam'],
-                ],
-                'squadre' => []
-            ];
-        }
-
-        if ($row['TeamName']) {
-            $torneiFiltrati[$torneoId]['squadre'][] = $row['TeamName'];
-        }
-    }
-
-    return $torneiFiltrati;
-}
 
 function scaricaTorneoSingolo($idTorneo)
 {

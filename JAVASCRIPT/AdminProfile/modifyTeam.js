@@ -268,9 +268,16 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     savebutton = document.getElementById('saveTeam');
 
-    savebutton.addEventListener('click',async function() {
+    savebutton.addEventListener('click', async function() {
         const updatedUsernames = Array.from(document.querySelectorAll('.username')).map(element => element.innerHTML.trim());
-
+    
+        // Controllo per username duplicati
+        const duplicates = updatedUsernames.filter((username, index, self) => self.indexOf(username) !== index);
+        if (duplicates.length > 0) {
+            showError(`Gli username duplicati non sono consentiti: ${duplicates.join(', ')}`);
+            return;
+        }
+    
         for (let i = 0; i < updatedUsernames.length; i++) {
             var user = await checkUsername(updatedUsernames[i]);
             if (user === null) {
@@ -278,38 +285,37 @@ document.addEventListener("DOMContentLoaded", async function() {
                 return;
             }
         }
-
+    
         const teamUsernames = copyTeam.utenti.map(user => user.username); // Prendi solo gli username dal team originale
-
+    
         const newComponenti = updatedUsernames.filter(username => !teamUsernames.includes(username));
-
-
+    
         console.log("componenti:");
         console.log(teamUsernames);
-
+    
         console.log("Nuovi componenti:");
         console.log(newComponenti);
-
+    
         for (let i = 0; i < newComponenti.length; i++) {
             var user = await checkUsername(newComponenti[i]);
-            if(await verifyTeamMember(user.userid)) {
-                showError(newComponenti[i]+' è già membro di un team');
+            if (await verifyTeamMember(user.userid)) {
+                showError(newComponenti[i] + ' è già membro di un team');
                 return;
             }
         }
-
+    
         const oldComponenti = teamUsernames.filter(username => !updatedUsernames.includes(username));
-
+    
         console.log("Vecchi componenti:");
         console.log(oldComponenti);
-
+    
         const query = new URLSearchParams({
             newComponents: JSON.stringify(newComponenti),
             oldComponents: JSON.stringify(oldComponenti),
             teamName: team.nome,
             numMembers: updatedUsernames.length,
         }).toString();
-
+    
         const response = await fetch('../../PHP/Team/modifyTeam.php', {
             method: 'POST',
             headers: {
@@ -317,13 +323,13 @@ document.addEventListener("DOMContentLoaded", async function() {
             },
             body: query,
         });
-
+    
         if (response.ok) {
             showPopup('Team modificato con successo!');
         } else {
             showError('Errore durante la modifica del team');
         }
-
+    
         window.location.href = 'manageTeams.php';
     });
 });

@@ -105,8 +105,25 @@ document.addEventListener('DOMContentLoaded', async function () {
         const participants = [];
         const numParticipants = participantsSelect.value;
 
+        if (!gameName.trim()) {
+            showError('Il nome della partita non può essere vuoto');
+            return;
+        }
+
         if (numParticipants < 2) {
             showError('Inserisci almeno 2 partecipanti');
+            return;
+        }
+
+        const participantNames = [];
+        for (let i = 1; i <= numParticipants; i++) {
+            const participantName = document.querySelector(`[name="participant${i}"]`).value;
+            participantNames.push(participantName);
+        }
+    
+        const uniqueNames = new Set(participantNames);
+        if (uniqueNames.size !== participantNames.length) {
+            showError('Ci sono partecipanti duplicati. Ogni partecipante deve avere un nome unico.');
             return;
         }
 

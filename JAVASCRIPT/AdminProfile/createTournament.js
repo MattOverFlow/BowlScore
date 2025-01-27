@@ -161,6 +161,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 newTeamFields.id = 'teamFields';
                 newTeamFields.className = 'col-12 mt-3 d-flex flex-column align-items-center';
 
+                let errorOccurred = false; 
+
                 for (let i = 1; i <= numTeamsSelect.value; i++) {
                     const teamDiv = document.createElement('div');
                     teamDiv.className = 'mb-3 w-100';
@@ -201,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             const teamData = await ScaricaDatiUtentiTeam(teamName);
                             if (!teamData) {
                                 alert(`Il team "${teamName}" non esiste.`);
+                                errorOccurred = true;
                                 return;
                             }
 
@@ -208,6 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 alert(
                                     `Il team "${teamName}" ha meno membri di quelli richiesti (${teamSizeSelect.value}).`
                                 );
+                                errorOccurred = true;
                                 return;
                             }
 
@@ -259,11 +263,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         } catch (error) {
                             console.error('Errore durante il recupero dei dati del team:', error);
                             alert('Il team non esiste');
+                            errorOccurred = true;
                         }
                     });
 
                     newTeamFields.appendChild(teamDiv);
                 }
+
+                if (errorOccurred) {
+                    showPopup('errorPopup', 'Errore nel recupero dei dati del team.');
+                    return;
+                }
+
                 additionalFieldsContainer.appendChild(newTeamFields);
             }
 
@@ -290,6 +301,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const numParticipants = parseInt(document.getElementById('numParticipants').value);
             const participants = [];
 
+            // Raccogli i nomi dei partecipanti
+            for (let i = 1; i <= numParticipants; i++) {
+                const username = document.getElementById(`username${i}`).value;
+                participants.push(username);
+            }
+
+            // Verifica se ci sono nomi duplicati
+            const uniqueNames = new Set(participants);
+            if (uniqueNames.size !== participants.length) {
+                showPopup('errorPopup', 'Ci sono partecipanti duplicati. Ogni partecipante deve avere un nome unico.');
+                return; // Interrompe l'operazione se ci sono duplicati
+            }
+
+            // Ora procedi con la verifica dell'esistenza degli username
             for (let i = 1; i <= numParticipants; i++) {
                 const username = document.getElementById(`username${i}`).value;
                 const userId = await usernameExist(username);
@@ -297,10 +322,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert('L\'username inserito non esiste: ' + username);
                     return;
                 }
-                participants.push(username);
-            }
-            if (participants.length !== numParticipants) {
-                return;
             }
 
             const query = new URLSearchParams({
@@ -324,8 +345,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             for (let i = 1; i <= 4; i++) {
-
-                if (!(await creaPartitaSingolo("Partita " + i, participants.length, participants, idTorneoSingolo))) {
+                var result = await creaPartitaSingolo("Partita " + i, participants.length, participants, idTorneoSingolo);
+                if (!result) {
                     showPopup('errorPopup', 'Errore nella creazione della partita.');
                     return;
                 };
@@ -344,6 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const teams = [];
             const matches = [];
+            const teamNames = [];
 
             if (numTeams < 2 || numTeams > 4) {
                 alert('Il numero di squadre deve essere compreso tra 2 e 4.');
@@ -356,6 +378,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert(`Inserisci il nome per la squadra ${i}`);
                     return;
                 }
+
+                if (teamNames.includes(teamName)) {
+                    showPopup('errorPopup', `Il nome della squadra "${teamName}" è duplicato.`);
+                    return;
+                }
+                teamNames.push(teamName);
 
                 const selectedPlayers = [];
                 const checkboxes = document.querySelectorAll(`input[name="team${i}Participants[]"]:checked`);
@@ -462,8 +490,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     team2.players.forEach(player => partecipanti.push(player));
 
-
-                    if (!(await creaPartitaSquadre(matches[i].matchName, partecipanti.length, partecipanti, idTorneoSquadre))) {
+                    var result = await creaPartitaSquadre(matches[i].matchName, partecipanti.length, partecipanti, idTorneoSquadre);
+                    if (!result) {
                         showPopup('errorPopup', 'Errore nella creazione della partita.');
                         return;
                     };

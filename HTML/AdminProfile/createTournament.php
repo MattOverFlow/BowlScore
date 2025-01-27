@@ -27,7 +27,7 @@ include '../../PHP/Utils/auth_request.php';
                 <a href="manageTournaments.php" class="sidebarField">Storico tornei</a>
                 <a href="manageTeams.php" class="sidebarField">Gestione teams</a>
                 <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Classifiche generali</a>
-                <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca giocatori</a>                    
+                <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca utenti</a>                    
                 <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">

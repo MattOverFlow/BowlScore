@@ -28,7 +28,7 @@ include '../../PHP/Utils/auth_request.php';
                 <a href="manageTournaments.php" class="sidebarField">Storico tornei</a>
                 <a href="manageTeams.php" class="sidebarField">Gestione teams</a>
                 <a href="../Statistics/generalStatistic.php?type=admin" class="sidebarField">Classifiche generali</a>
-                <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca giocatori</a>                    
+                <a href="../UserProfile/searchPage.php?type=admin" class="sidebarField">Cerca utenti</a>                    
                 <a href="../../PHP/Utils/Logout.php" class="sidebarField">Logout</a>
             </div>
             <button class="openbtn" id="openbtn">
@@ -79,7 +79,7 @@ include '../../PHP/Utils/auth_request.php';
                             <div class="me-2 w-50">
                                 <label for="numTeams" class="form-label">Numero di team:</label>
                                 <select class="form-control" id="numTeams">
-                                    <option value="" disabled selected>Seleziona</option>
+                                    <option value="">Seleziona</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
                                     <option value="4">4</option>
@@ -88,7 +88,7 @@ include '../../PHP/Utils/auth_request.php';
                             <div class="w-50">
                                 <label for="teamSize" class="form-label">Dimensione dei team:</label>
                                 <select class="form-control" id="teamSize">
-                                    <option value="" disabled selected>Seleziona</option>
+                                    <option value="">Seleziona</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
                                     <option value="4">4</option>
@@ -148,5 +148,15 @@ include '../../PHP/Utils/auth_request.php';
             singleFilters.style.display = 'none';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const toggleCheckbox = document.getElementById('toggleFilters');
+    const filtersContainer = document.getElementById('filtersContainer');
+    const searchButton = document.getElementById('searchButton');
+
+    toggleCheckbox.checked = false; 
+    filtersContainer.style.display = 'none';
+    searchButton.innerHTML = 'Cerca';
+});
 </script>
 </html>

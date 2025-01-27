@@ -163,4 +163,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
+    // Reset dei filtri e sblocco dei campi al ritorno alla pagina principale
+    window.addEventListener('popstate', function () {
+        const toggleFiltersCheckbox = document.getElementById('toggleFilters');
+        const numTeamsSelect = document.getElementById('numTeams');
+        const teamSizeSelect = document.getElementById('teamSize');
+
+        // Deseleziona la checkbox dei filtri
+        toggleFiltersCheckbox.checked = false;
+
+        // Nasconde i filtri
+        numTeamsSelect.disabled = true;
+        teamSizeSelect.disabled = true;
+
+        // Rimuove eventuali valori dai campi
+        document.getElementById('searchInput').value = '';
+        document.getElementById('numTeams').value = '';
+        document.getElementById('teamSize').value = '';
+        document.getElementById('teamName').value = '';
+        document.getElementById('usernameField').value = '';
+    });
+
 });

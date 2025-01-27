@@ -1,9 +1,7 @@
-document.addEventListener('DOMContentLoaded', function() {
-
+document.addEventListener('DOMContentLoaded', function () {
     var mainTag = document.querySelector("main");
 
     function renderSingleTournaments(singleTournaments) {
-
         const tournaments = Object.values(singleTournaments);
 
         tournaments.forEach((tournament) => {
@@ -40,9 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
             mainTag.innerHTML += singleTournamentHTML;
         });
     }
-    
+
     function renderTeamTournaments(teamTournaments) {
-        
         const tournaments = Object.values(teamTournaments);
 
         tournaments.forEach((tournament) => {
@@ -92,8 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const searchButton = document.getElementById("searchButton");
 
-    searchButton.addEventListener("click",async function() {
-
+    searchButton.addEventListener("click", async function () {
         const searchInput = document.getElementById('searchInput').value.trim();
         const toggleFiltersCheckbox = document.getElementById('toggleFilters');
 
@@ -134,7 +130,6 @@ document.addEventListener('DOMContentLoaded', function() {
             username: filters.username && filters.username !== "" ? filters.username : null
         }).toString();
 
-
         const response = await fetch('../../PHP/Torneo/RicercaStoricoTornei.php', {
             method: 'POST',
             headers: {
@@ -149,7 +144,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
         renderSingleTournaments(data.torneiSingoli);
         renderTeamTournaments(data.torneiSquadre);
-
     });
+    
+    // Reset dei filtri e sblocco dei campi al ritorno alla pagina principale
+    window.addEventListener('popstate', function () {
+        const toggleFiltersCheckbox = document.getElementById('toggleFilters');
+        const numTeamsSelect = document.getElementById('numTeams');
+        const teamSizeSelect = document.getElementById('teamSize');
 
+        // Deseleziona la checkbox dei filtri
+        toggleFiltersCheckbox.checked = false;
+
+        // Nasconde i filtri
+        numTeamsSelect.disabled = true;
+        teamSizeSelect.disabled = true;
+
+        // Rimuove eventuali valori dai campi
+        document.getElementById('searchInput').value = '';
+        document.getElementById('numTeams').value = '';
+        document.getElementById('teamSize').value = '';
+        document.getElementById('teamName').value = '';
+        document.getElementById('usernameField').value = '';
+    });
 });
